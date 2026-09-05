@@ -36,10 +36,11 @@ A solução consiste em um assistente virtual interativo no Telegram que process
 
 | Prioridade | User Story | Esforço (SP) | Sprint | Status |
 | :--: | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :----------: | :----: | :----: |
-| Alta | Como comprador, gostaria de encontrar com facilidade os imóveis disponíveis com uma busca refinada básica, para ter mais facilidade ao encontrar um imóvel de acordo com meus parâmetros. | 25 | 1 | ⏳ |
-| Alta | Como comprador, gostaria de ter prévias apresentações do imóvel para escolher um que esteja de acordo com minhas necessidades diárias: mercado perto, próximo a escola dos filhos, pontos de interesse próximos. | 28 | 3 | ⏳ |
-| Alta | Como vendedor, gostaria de saber quais são os requisitos mais procurados pelos compradores no último mês ou semana (utilizando um contador de especificidades). | 36 | 3 | ⏳ |
-| Média | Como vendedor, gostaria de ter acesso as notícias para especulação imobiliária.  | 36 | 1 | ⏳ |
+| Alta | Como comprador, gostaria de encontrar com facilidade os imóveis disponíveis com uma busca básica, para ter mais facilidade ao encontrar um imóvel de acordo com meus parâmetros. | 30 | 1 | ⏳ |
+| Alta | Como comprador, gostaria de ter prévias apresentações do imóvel para escolher um que esteja de acordo com as necessidades diárias como pontos de interesse próximos. | 36 | 3 | ⏳ |
+| Alta | Como vendedor, gostaria de saber quais são os requisitos mais procurados pelos compradores no último mês ou semana (utilizando um contador de especificidades). | 60 | 3 | ⏳ |
+| Média | Como vendedor, gostaria de ter acesso as notícias para especulação imobiliária.  | 23 | 1 | ⏳ |
+| Média | Como Comprador ou Vendedor, gostaria de um ID de usuário, para que minhas buscas sejam salvas e eu consiga continuar as minhas pesquisas. | 60 | 3 | ⏳ |
 | Média | Como comprador, gostaria de ter acesso a pequenas notícias recentes dos arredores do imóvel, para estudar questões de saúde pública pontuais (pragas, criminalidade, infraestrutura, etc). | 39 | 1 | ⏳ |
 | Média | Como comprador, gostaria de me comunicar com o chatbot por áudio para ser acessível para um maior número de pessoas. | 65 | 2 | ⏳ |
 | Baixa | Como vendedor, gostaria de ser informado quando a ia não tiver as informações necessárias para que eu possa acrescentar no banco de dados. (ex: piscina no imóvel, quadra, condomínio, etc) | 36 | 2 | ⏳ |
