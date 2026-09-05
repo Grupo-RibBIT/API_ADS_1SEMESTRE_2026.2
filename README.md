@@ -3,7 +3,7 @@
 # Imóveis SP - Chatbot Telegram
 
 <p align="center">
-  <img src="../images/logo.png" alt="Logo do Projeto" width="200">
+  <img src="images/logo.png" alt="Logo do Projeto" width="200">
 </p>
 
 <h1 align="center">Ribbit</h1>
