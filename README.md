@@ -20,19 +20,24 @@
 
 <br>
 
-> **Status do Projeto:** Em Desenvolvimento ⏳
+<p align="center">
+> Status do Projeto:** Em Desenvolvimento ⏳
+</p>
 
-## 🏅 Desafio <a id="desafio"></a>
+<p align="center">
+ 🏅 Desafio <a id="desafio"></a>
 
 O desafio consiste em desenvolver um **chatbot para o Telegram integrado com uma Inteligência Artificial (IA) Local**, focado no mercado imobiliário de **São Paulo (SP)**. O bot deve consumir dados de uma base CSV pré-existente contendo informações detalhadas sobre casas e apartamentos à venda, incluindo valores, localidades e características específicas dos imóveis, permitindo uma interação inteligente, fluida e acessível tanto para compradores quanto para vendedores.
+</p>
 
-## 🏅 Solução <a id="solucao"></a>
+<p align="center">
+ 🏅 Solução <a id="solucao"></a>
 
 A solução consiste em um assistente virtual interativo no Telegram que processa consultas em linguagem natural. Utilizando técnicas de IA para buscar informações na base de dados imobiliária, o chatbot ajuda compradores a encontrar o imóvel ideal através de buscas refinadas, comandos de voz e insights de localização. Para os vendedores, o sistema fornece dados analíticos sobre as preferências do mercado e alertas de lacunas de informação na base de dados, potencializando a especulação e a assertividade imobiliária na região de SP.
-
+</p>
 ---
 
-## 📋 Backlog do Produto <a id="backlog"></a>
+ 📋 Backlog do Produto <a id="backlog"></a>
 
 | Prioridade | User Story | Esforço (SP) | Sprint | Status |
 | :--: | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :----------: | :----: | :----: |
@@ -48,32 +53,34 @@ A solução consiste em um assistente virtual interativo no Telegram que process
 | Baixa | Como usuário, gostaria de selecionar se sou comprador ou vendedor para ter acessos específicos no chatbot. | 20 | 2 | 0% |
 
 ---
-
-## 🏃‍♂️ DoR - Definition of Ready <a id="dor"></a>
+<p align="center">
+ 🏃‍♂️ DoR - Definition of Ready <a id="dor"></a>
 
 * **Histórias de Usuário (US):** Descritas de forma clara e acompanhadas de seus respectivos Critérios de Aceitação.**
 * **Decomposição Técnica:** Itens complexos mapeados e divididos em subtarefas acionáveis.**
 * **Estimativa:** Nível de esforço/complexidade discutido e definido pelo time de desenvolvimento.**
 * **Viabilidade Técnica:** Competências necessárias mapeadas, com curva de aprendizado ou pesquisa (Spike) limitada a no máximo 2 dias.**
+</p>
 
-## 🏆 DoD - Definition of Done <a id="dod"></a>
+<p align="center">
+ 🏆 DoD - Definition of Done <a id="dod"></a>
 
 #A definir
+</p>
 
 ---
-
-## 📅 Cronograma de Sprints <a id="sprint"></a>
+ 📅 Cronograma de Sprints <a id="sprint"></a>
 
 | Sprint | Período | Documentação |
-| --------------- | :-----------: | ------------------------------------------------ |
+| :---------: | :------------: | :-----------------------------------------: |
 | 📌 SPRINT 1 | 07/09 - 27/09 | [Sprint 1 Docs](./Docs/Sprints/Sprint-1.md) |
 | 📌 SPRINT 2 | 05/10 - 25/10 | [Sprint 2 Docs](./Docs/Sprints/Sprint-2.md) |
 | 📌 SPRINT 3 | 02/11 - 22/11 | [Sprint 3 Docs](./Docs/Sprints/Sprint-3.md) |
 
 ---
-
-## 💻 Tecnologias <a id="tecnologias"></a>
-
+<p align="center">
+ 💻 Tecnologias <a id="tecnologias"></a>
+</p>
 <p align="center">
   <a href="https://www.python.org/"><img src="https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white"></a>
    <a href="https://github.com/"><img src="https://img.shields.io/badge/github-%23121011.svg?style=for-the-badge&logo=github&logoColor=white"/></a>
@@ -83,27 +90,26 @@ A solução consiste em um assistente virtual interativo no Telegram que process
 </p>
 
 ---
-
-## 📖 Manual de Instalação <a id="manual"></a>
+<p align="center">
+ 📖 Manual de Instalação <a id="manual"></a>
 
 #Manual em planejamento.
 
-### 🛠 Pré-requisitos
+ 🛠 Pré-requisitos
 
-- Git ([Download](https://git-scm.com))
-- Python 3.x ([Download](https://python.orgdownloads/))
-
+- Acesso a internet
+</p>
+  
 ---
+<p align="center">
+ 🏃‍♂️ Como Executar o Projeto (Em Breve)
 
-### 🏃‍♂️ Como Executar o Projeto (Em Breve)
-
-```bash
 # Instruções de instalação e execução serão adicionadas conforme o desenvolvimento do ambiente.
-```
+</p>
 
 ---
-
-## 🎓 Equipe <a id="equipe"></a>
+<p align="center">
+ 🎓 Equipe <a id="equipe"></a>
 
 <div align="center">
   <table>
@@ -164,3 +170,4 @@ A solução consiste em um assistente virtual interativo no Telegram que process
     </tr>
   </table>
 </div>
+</p>
