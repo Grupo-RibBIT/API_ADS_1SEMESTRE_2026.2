@@ -66,9 +66,9 @@ A solução consiste em um assistente virtual interativo no Telegram que process
 
 | Sprint | Período | Documentação |
 | --------------- | :-----------: | ------------------------------------------------ |
-| 🔖 **SPRINT 1** | 07/09 - 27/09 | [Sprint 1 Docs](./docs/processo/sprints/sprint-1/README.md) |
-| 🔖 **SPRINT 2** | 05/10 - 25/10 | [Sprint 2 Docs](./docs/processo/sprints/sprint-2/README.md) |
-| 🔖 **SPRINT 3** | 02/11 - 22/11 | [Sprint 3 Docs](./docs/processo/sprints/sprint-3/README.md) |
+| 🔖 **SPRINT 1** | 07/09 - 27/09 | [Sprint 1 Docs](./Docs/Sprints/sprint-1.md) |
+| 🔖 **SPRINT 2** | 05/10 - 25/10 | [Sprint 2 Docs](./Docs/Sprints/sprint-2.md) |
+| 🔖 **SPRINT 3** | 02/11 - 22/11 | [Sprint 3 Docs](./Docs/Sprints/sprint-3.md) |
 
 ---
 
