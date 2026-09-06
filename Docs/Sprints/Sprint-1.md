@@ -28,9 +28,9 @@
 
 | Prioridade | User Story                                                                                                                                                                                   | Story Points | Sprint | Status |
 | :--------: | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :----------: | :----: | :----: |
-|    Alta    | Como comprador, gostaria de encontrar com facilidade os imóveis disponíveis com uma busca básica, para ter mais facilidade ao encontrar um imóvel de acordo com meus parâmetros.             |      30      |   1    |   ⏳   |
-|    Médio   | Como vendedor, gostaria de ter acesso as notícias para especulação imobiliária.                                                                                                              |      23      |   1    |   ⏳   |
-|    Médio   | Como comprador, gostaria de ter acesso a pequenas notícias recentes dos arredores do imóvel, para estudar questões de saúde pública pontuais (pragas, criminalidade, infraestrutura, etc).   |      39      |   1    |   ⏳   |
+|    Alta    | Como comprador, gostaria de encontrar com facilidade os imóveis disponíveis com uma busca básica, para ter mais facilidade ao encontrar um imóvel de acordo com meus parâmetros.             |      20      |   1    |   0%   |
+|    Médio   | Como vendedor, gostaria de ter acesso a notícias recentes para especulação imobiliária.                                                                                                      |      14      |   1    |   0%   |
+|    Médio   | Como comprador, gostaria de ter acesso a pequenas notícias recentes dos arredores do imóvel, para estudar questões de saúde pública pontuais (pragas, criminalidade, infraestrutura, etc).   |      14      |   1    |   0%   |
 
 ## 🏅 DoR - Definition of Ready <a id="dor"></a>
 
