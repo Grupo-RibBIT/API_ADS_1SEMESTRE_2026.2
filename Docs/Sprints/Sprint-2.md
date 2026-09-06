@@ -2,6 +2,8 @@
 
 # Imóveis SP - Chatbot Telegram
 
+# Documentação - Sprint 2
+
 <p align="center">
   <img src="images/logo.png" alt="Logo do Projeto" width="200">
 </p>
