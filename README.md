@@ -2,9 +2,7 @@
 
 # Imóveis SP - Chatbot Telegram
 
-<p align="center">
-  <img src="images/logo.png" alt="Logo do Projeto" width="200">
-</p>
+<img src="/Arquivos de suporte pro readme/logo.png" alt="Reunião de oito sapos" width="260">
 
 <h1 align="center">Ribbit</h1>
 
