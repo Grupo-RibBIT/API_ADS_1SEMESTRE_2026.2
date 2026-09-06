@@ -28,9 +28,9 @@
 
 | Prioridade | User Story                                                                                                                                                                                   | Story Points | Sprint | Status |
 | :--------: | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :----------: | :----: | :----: |
-|    Alta    | Como comprador, gostaria de encontrar com facilidade os imóveis disponíveis com uma busca básica, para ter mais facilidade ao encontrar um imóvel de acordo com meus parâmetros.             |      20      |   1    |   0%   |
-|    Médio   | Como vendedor, gostaria de ter acesso a notícias recentes para especulação imobiliária.                                                                                                      |      14      |   1    |   0%   |
-|    Médio   | Como comprador, gostaria de ter acesso a pequenas notícias recentes dos arredores do imóvel, para estudar questões de saúde pública pontuais (pragas, criminalidade, infraestrutura, etc).   |      14      |   1    |   0%   |
+|    Alta    | Como comprador, gostaria de encontrar com facilidade os imóveis disponíveis do banco de dados com uma busca básica, para ter mais facilidade ao encontrar um imóvel de acordo com meus parâmetros.             |      20      |   1    |   0%   |
+|    Médio   | Como vendedor ou comprador, gostaria de ter acesso a notícias recentes relacionadas à pesquisa no banco de dados para especulação imobiliária (saúde pública, pragas, criminalidade, infraestrutura, etc).                                                                                                      |      14      |   1    |   0%   |
+|    Baixa   | Como vendedor ou comprador, gostaria de selecionar se sou comprador ou vendedor para ter acessos específicos no chatbot. | 14 | 1 | 0% |
 
 ## 🏅 DoR - Definition of Ready <a id="dor"></a>
 
@@ -38,25 +38,22 @@
 | :------------------------------: | -------------------------------------------------------------------------------------------------------------------- |
 |       Clareza na Descrição       | A User Story está escrita no formato “Como [persona], quero [ação] para que [objetivo]”                              |
 | Critérios de Aceitação Definidos | A história possui critérios objetivos que indicam o que é necessário para considerá-la concluída.                    |
-| Cenários de Teste Especificados  | A história tem pelo menos 1 cenário de teste estruturado (Dado, Quando, Então).                                      |
-|           Independente           | A história pode ser implementada sem depender de outra tarefa da mesma Sprint.                                       |
 |    Compreensão Compartilhada     | Toda a equipe (incluindo PO e devs) compreende o propósito da história.                                              |
 |            Estimável             | A história foi pontuada no Planning Poker ou tem uma estimativa clara.                                               |
-|       Documentos de Apoio        | Se necessário, mockups, fluxos ou modelos de dados estão anexados ou referenciados.                                  |
+|       Documentos de Apoio        | Se necessário, mockups, CSV, fluxos ou modelos de dados estão anexados ou referenciados.                             |
 |   Critérios técnicos acordados   | As necessidades do Telegram e das Funcionalidades locais foram claramente separadas (quando aplicável).              |
 
 ## 🏅 DoD - Definition of Done <a id="dod"></a>
 
 |                 Critério                 | Descrição                                                                            |
 | :--------------------------------------: | ------------------------------------------------------------------------------------ |
-|     Critérios de Aceitação atendidos     | Todos os cenários de teste da história foram executados e aprovados.                 |
-|        Testes manuais realizados         | Onde aplicável, os dados são corretamente armazenados.                               |
+|           Criterio aceitacao             | Código revisado por pelo menos 2 devs e aprovado por maioria simples do Dev Team (sem bugs ou halucinacoes do LLM que fujam das ferramentas usadas)                 |
+|             Codigo Testado               | Precisa funcionar em pelo menos dois computadores que não sejam da pessoa desenvolvendo o codigo                               |
 |             Código revisado              | O código foi revisado por pelo menos um colega de equipe.                            |
-|     Documentação interna atualizada      | Foi atualizado o que for necessário: API, estrutura de dados, Telegram, etc.         |
+|               Documentação               | O código está com sua função e expectativa atual de resultados coerente com a entrega, com perspectiva de melhorias quando necessário-- Item de backlog para futuras implementações da funcionalidade     está criado e atualizado         |
 |  Integração com outras partes testadas   | As interfaces entre Telegram e ferramentas locais foram validadas.                   |
-| Build/Testes automatiados (se aplicável) | A funcionalidade não quebra a aplicação e passa nos testes automatizados existentes. |
 |             Validação do PO              | O Product Owner validou a entrega com base nos critérios definidos.                  |
-|            Pronto para deploy            | O item está testado, validado e pode ser integrado ao produto final.                 |
+|            Implementação                 | A funcionalidade está pronta para ser implementada no produto.                       |
 
 ## 🎓 Equipe <a id="equipe"></a>
 
