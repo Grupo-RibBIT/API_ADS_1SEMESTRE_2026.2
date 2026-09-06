@@ -41,31 +41,42 @@ A solução consiste em um assistente virtual interativo no Telegram que process
 
 | Prioridade | User Story | Esforço (SP) | Sprint | Status |
 | :--: | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :----------: | :----: | :----: |
-| Alta | Como comprador, gostaria de encontrar com facilidade os imóveis disponíveis com uma busca básica, para ter mais facilidade ao encontrar um imóvel de acordo com meus parâmetros. | 30 | 1 | 0% |
+| Alta | Como comprador, gostaria de encontrar com facilidade os imóveis disponíveis do banco de dados com uma busca básica, para ter mais facilidade ao encontrar um imóvel de acordo com meus parâmetros. | 20 | 1 | 0% |
 | Alta | Como comprador, gostaria de ter prévias apresentações do imóvel para escolher um que esteja de acordo com as necessidades diárias como pontos de interesse próximos. | 36 | 3 | 0% |
 | Alta | Como vendedor, gostaria de saber quais são os requisitos mais procurados pelos compradores no último mês ou semana (utilizando um contador de especificidades). | 60 | 3 | 0% |
-| Média | Como vendedor, gostaria de ter acesso as notícias para especulação imobiliária.  | 23 | 1 | 0% |
+| Média | Como vendedor ou comprador, gostaria de ter acesso a notícias recentes relacionadas à pesquisa no banco de dados para especulação imobiliária (saúde pública, pragas, criminalidade, infraestrutura, etc).  | 14 | 1 | 0% |
 | Média | Como Comprador ou Vendedor, gostaria de um ID de usuário, para que minhas buscas sejam salvas e eu consiga continuar as minhas pesquisas. | 60 | 3 | 0% |
-| Média | Como comprador, gostaria de ter acesso a pequenas notícias recentes dos arredores do imóvel, para estudar questões de saúde pública pontuais (pragas, criminalidade, infraestrutura, etc). | 39 | 1 | 0% |
 | Média | Como comprador, gostaria de me comunicar com o chatbot por áudio para ser acessível para um maior número de pessoas. | 65 | 2 | 0% |
 | Baixa | Como vendedor, gostaria de ser informado quando a ia não tiver as informações necessárias para que eu possa acrescentar no banco de dados. (ex: piscina no imóvel, quadra, condomínio, etc) | 36 | 2 | 0% |
 | Baixa | Como comprador, gostaria de ter um link aproximado do google maps para que possa ver a localização aproximada dos imóveis visualmente. | 45 | 2 | 0% |
-| Baixa | Como usuário, gostaria de selecionar se sou comprador ou vendedor para ter acessos específicos no chatbot. | 20 | 2 | 0% |
+| Baixa | Como cliente, gostaria de ser reconhecido se sou comprador ou vendedor para ter recomendações que melhor atendam  minhas necessidades. | 14 | 1 | 0% |
 
 ---
 <p align="center">
- 🏃‍♂️ DoR - Definition of Ready <a id="dor"></a>
+ 🏅 DoR - Definition of Ready <a id="dor"></a>
 
-* **Histórias de Usuário (US):** Descritas de forma clara e acompanhadas de seus respectivos Critérios de Aceitação.**
-* **Decomposição Técnica:** Itens complexos mapeados e divididos em subtarefas acionáveis.**
-* **Estimativa:** Nível de esforço/complexidade discutido e definido pelo time de desenvolvimento.**
-* **Viabilidade Técnica:** Competências necessárias mapeadas, com curva de aprendizado ou pesquisa (Spike) limitada a no máximo 2 dias.**
+|             Critério             | Descrição                                                                                                            |
+| :------------------------------: | -------------------------------------------------------------------------------------------------------------------- |
+|       Clareza na Descrição       | A User Story está escrita no formato “Como [persona], quero [ação] para que [objetivo]”                              |
+| Critérios de Aceitação Definidos | A história possui critérios objetivos que indicam o que é necessário para considerá-la concluída.                    |
+|    Compreensão Compartilhada     | Toda a equipe (incluindo PO e devs) compreende o propósito da história.                                              |
+|            Estimável             | A história foi pontuada no Planning Poker ou tem uma estimativa clara.                                               |
+|       Documentos de Apoio        | Se necessário, mockups, CSV, fluxos ou modelos de dados estão anexados ou referenciados.                             |
+|   Critérios técnicos acordados   | As necessidades do Telegram e das Funcionalidades locais foram claramente separadas (quando aplicável).              |
 </p>
 
 <p align="center">
- 🏆 DoD - Definition of Done <a id="dod"></a>
+ 🏅 DoD - Definition of Done <a id="dod"></a>
 
-#A definir
+|                 Critério                 | Descrição                                                                            |
+| :--------------------------------------: | ------------------------------------------------------------------------------------ |
+|           Criterio aceitacao             | Código revisado por pelo menos 2 devs e aprovado por maioria simples do Dev Team (sem bugs ou halucinacoes do LLM que fujam das ferramentas usadas)                 |
+|             Codigo Testado               | Precisa funcionar em pelo menos dois computadores que não sejam da pessoa desenvolvendo o codigo                               |
+|             Código revisado              | O código foi revisado por pelo menos um colega de equipe.                            |
+|               Documentação               | O código está com sua função e expectativa atual de resultados coerente com a entrega, com perspectiva de melhorias quando necessário-- Item de backlog para futuras implementações da funcionalidade     está criado e atualizado         |
+|  Integração com outras partes testadas   | As interfaces entre Telegram e ferramentas locais foram validadas.                   |
+|             Validação do PO              | O Product Owner validou a entrega com base nos critérios definidos.                  |
+|            Implementação                 | A funcionalidade está pronta para ser implementada no produto.                       |
 </p>
 
 ---
