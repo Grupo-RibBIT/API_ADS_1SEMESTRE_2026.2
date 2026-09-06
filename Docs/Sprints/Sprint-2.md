@@ -20,7 +20,7 @@
 
 ## 🏅 Desafio <a id="desafio"></a>
 
-**Implementar a infraestrutura base do Chatbot no Telegram focado em Imóveis (SP) e o sistema de busca essencial.** O objetivo principal desta entrega é permitir que o usuário realize consultas de imóveis disponíveis através de filtros básicos na interface do bot, além de estruturar os módulos iniciais para o consumo e exibição de notícias gerais sobre o mercado imobiliário e dados regionais (saúde pública, criminalidade e infraestrutura).
+**Refinar a experiência e acessibilidade do usuário no Chatbot através de comandos de voz, segmentação de perfis e enriquecimento visual com mapas.** O objetivo principal desta entrega é evoluir a maturidade do bot, permitindo interações mais inclusivas (comunicação por áudio), a separação clara de fluxos de jornada para compradores e vendedores, além da implementação de geolocalização e de mecanismos de alertas automatizados de IA para a complementação de dados do banco.
 
 ## 📋 User Stories <a id="us"></a>
 
