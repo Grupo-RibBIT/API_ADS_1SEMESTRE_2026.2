@@ -1,43 +1,43 @@
 # API 1º Semestre ADS - FATEC
 
+> Status do Projeto: Em progresso!
+
 # Imóveis SP - Chatbot Telegram
 
 <p align="center">
   <img src="./Docs/images/logo.png" alt="Logo do Projeto" width="200">
 </p>
 
-<h1 align="center">Ribbit</h1>
+<div align="center">
+  
+# Ribbit 
 
-<p align="center">
-  <a href="#desafio">Desafio</a> | 
-  <a href="#solucao">Solução</a> | 
-  <a href="#backlog">Backlog do Produto</a> | 
-  <a href="#sprint">Cronograma de Sprints</a> | 
-  <a href="#tecnologias">Tecnologias</a> | 
-  <a href="#manual">Manual de Instalação</a> | 
-  <a href="#equipe">Equipe</a>
-</p>
+| <a href="#desafio">Desafio</a> | <a href="#solucao">Solução</a> | <a href="#backlog">Backlog do Produto</a> | <a href="#sprint">Cronograma de Sprints</a> | <a href="#tecnologias">Tecnologias</a> | 
+<a href="#manual">Manual de Instalação</a> | <a href="#equipe">Equipe</a>
 
-<br>
+</div>
 
-<p align="center">
-> Status do Projeto:** Em Desenvolvimento ⏳
-</p>
+<div align="center">
+  
+## 🎯Desafio <a id="desafio"></a>
+  
+</div>
 
-<p align="center">
- 🏅 Desafio <a id="desafio"></a>
+O desafio consiste em desenvolver uma solução que permita clientes consultarem o imenso ecossistema do mercado imobiliário da cidade de São Paulo. Através de uma base CSV pré-existente contendo informações detalhadas sobre apartamentos à venda, incluindo valores, localidades e características específicas dos imóveis, as pessoas devem ser capazes de acharem um apartamento ideal com velocidade e eficiência.
 
-O desafio consiste em desenvolver um **chatbot para o Telegram integrado com uma Inteligência Artificial (IA) Local**, focado no mercado imobiliário de **São Paulo (SP)**. O bot deve consumir dados de uma base CSV pré-existente contendo informações detalhadas sobre casas e apartamentos à venda, incluindo valores, localidades e características específicas dos imóveis, permitindo uma interação inteligente, fluida e acessível tanto para compradores quanto para vendedores.
-</p>
+<div align="center">
+  
+## 🏅Solução <a id="solucao"></a>
+  
+</div>
 
-<p align="center">
- 🏅 Solução <a id="solucao"></a>
+A solução consiste em um **chatbot para o Telegram integrado com uma Inteligência Artificial (IA) Local**. Utilizando técnicas de IA para buscar informações na base de dados imobiliária, o chatbot ajuda compradores a encontrar o imóvel ideal através de buscas refinadas, comandos de voz e insights de localização. Para os vendedores, o sistema fornece dados analíticos sobre as preferências do mercado e alertas de lacunas de informação na base de dados, potencializando a especulação e a assertividade imobiliária na região de SP.
 
-A solução consiste em um assistente virtual interativo no Telegram que processa consultas em linguagem natural. Utilizando técnicas de IA para buscar informações na base de dados imobiliária, o chatbot ajuda compradores a encontrar o imóvel ideal através de buscas refinadas, comandos de voz e insights de localização. Para os vendedores, o sistema fornece dados analíticos sobre as preferências do mercado e alertas de lacunas de informação na base de dados, potencializando a especulação e a assertividade imobiliária na região de SP.
-</p>
----
+<div align="center">
+  
+ ## Backlog do Produto <a id="backlog"></a>
 
- 📋 Backlog do Produto <a id="backlog"></a>
+</div>
 
 | Prioridade | User Story | Esforço (SP) | Sprint | Status |
 | :--: | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :----------: | :----: | :----: |
@@ -51,9 +51,12 @@ A solução consiste em um assistente virtual interativo no Telegram que process
 | Baixa | Como comprador, gostaria de ter um link aproximado do google maps para que possa ver a localização aproximada dos imóveis visualmente. | 45 | 2 | 0% |
 | Baixa | Como cliente, gostaria de ser reconhecido se sou comprador ou vendedor para ter recomendações que melhor atendam  minhas necessidades. | 14 | 1 | 0% |
 
----
-<p align="center">
- 🏅 DoR - Definition of Ready <a id="dor"></a>
+
+<div align="center">
+  
+## DoR - Definition of Ready <a id="dor"></a>
+
+</div>
 
 |             Critério             | Descrição                                                                                                            |
 | :------------------------------: | -------------------------------------------------------------------------------------------------------------------- |
@@ -63,10 +66,13 @@ A solução consiste em um assistente virtual interativo no Telegram que process
 |            Estimável             | A história foi pontuada no Planning Poker ou tem uma estimativa clara.                                               |
 |       Documentos de Apoio        | Se necessário, mockups, CSV, fluxos ou modelos de dados estão anexados ou referenciados.                             |
 |   Critérios técnicos acordados   | As necessidades do Telegram e das Funcionalidades locais foram claramente separadas (quando aplicável).              |
-</p>
 
-<p align="center">
- 🏅 DoD - Definition of Done <a id="dod"></a>
+
+<div align="center">
+  
+## DoD - Definition of Done <a id="dod"></a>
+
+</div>
 
 |                 Critério                 | Descrição                                                                            |
 | :--------------------------------------: | ------------------------------------------------------------------------------------ |
@@ -77,10 +83,10 @@ A solução consiste em um assistente virtual interativo no Telegram que process
 |  Integração com outras partes testadas   | As interfaces entre Telegram e ferramentas locais foram validadas.                   |
 |             Validação do PO              | O Product Owner validou a entrega com base nos critérios definidos.                  |
 |            Implementação                 | A funcionalidade está pronta para ser implementada no produto.                       |
-</p>
 
----
- 📅 Cronograma de Sprints <a id="sprint"></a>
+<div align="center">
+  
+## Cronograma de Sprints <a id="sprint"></a>
 
 | Sprint | Período | Documentação |
 | :---------: | :------------: | :-----------------------------------------: |
@@ -88,39 +94,49 @@ A solução consiste em um assistente virtual interativo no Telegram que process
 | 📌 SPRINT 2 | 05/10 - 25/10 | [Sprint 2 Docs](./Docs/Sprints/Sprint-2.md) |
 | 📌 SPRINT 3 | 02/11 - 22/11 | [Sprint 3 Docs](./Docs/Sprints/Sprint-3.md) |
 
----
-<p align="center">
- 💻 Tecnologias <a id="tecnologias"></a>
-</p>
-<p align="center">
-  <a href="https://www.python.org/"><img src="https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white"></a>
-   <a href="https://github.com/"><img src="https://img.shields.io/badge/github-%23121011.svg?style=for-the-badge&logo=github&logoColor=white"/></a>
+</div>
+
+<div align="center">
+  
+## Tecnologias <a id="tecnologias"></a>
+
+</div>
+
+<div align="center">
+  
+ <a href="https://www.python.org/"><img src="https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white"></a>
+ <a href="https://github.com/"><img src="https://img.shields.io/badge/github-%23121011.svg?style=for-the-badge&logo=github&logoColor=white"/></a>
  <a href="https://www.atlassian.com/software/jira"><img src="https://img.shields.io/badge/Jira-0052CC?style=for-the-badge&logo=jira&logoColor=white"/></a>
  <a href="https://web.telegram.org/k/"><img src="https://img.shields.io/badge/Telegram-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white"/></a>
 
-</p>
+</div>
 
----
-<p align="center">
- 📖 Manual de Instalação <a id="manual"></a>
+<div align="center">
+
+## 📖 Manual de Instalação <a id="manual"></a>
+
+</div>
 
 #Manual em planejamento.
 
  🛠 Pré-requisitos
 
 - Acesso a internet
-</p>
+
   
----
-<p align="center">
- 🏃‍♂️ Como Executar o Projeto (Em Breve)
+<div align="center">
+  
+ ## Como Executar o Projeto (Em Breve)
 
-# Instruções de instalação e execução serão adicionadas conforme o desenvolvimento do ambiente.
-</p>
+</div>
 
----
-<p align="center">
- 🎓 Equipe <a id="equipe"></a>
+- Instruções de instalação e execução serão adicionadas conforme o desenvolvimento do ambiente.
+
+<div align="center">
+  
+## Equipe <a id="equipe"></a>
+
+</div>
 
 <div align="center">
   <table>
@@ -177,7 +193,7 @@ A solução consiste em um assistente virtual interativo no Telegram que process
     <tr>
       <td>Vinícius</td>
       <td>Desenvolvedor</td>
-      <td>-</td>
+      <td><a href="https://github.com/viniconst85"><img src="https://img.shields.io/badge/github-%23121011.svg?style=for-the-badge&logo=github&logoColor=white"/></a>
     </tr>
   </table>
 </div>
