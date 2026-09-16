@@ -29,8 +29,8 @@
 | Prioridade | User Story                                                                                                                                                                                   | Story Points | Sprint | Status |
 | :--------: | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :----------: | :----: | :----: |
 |    Alta    | Como comprador, gostaria de encontrar com facilidade os imóveis disponíveis do banco de dados com uma busca básica, para ter mais facilidade ao encontrar um imóvel de acordo com meus parâmetros.             |      20      |   1    |   0%   |
-|    Médio   | Como vendedor ou comprador, gostaria de ter acesso a notícias recentes relacionadas à pesquisa no banco de dados para especulação imobiliária (saúde pública, pragas, criminalidade, infraestrutura, etc).                                                                                                      |      14      |   1    |   0%   |
-|    Baixa   | Como cliente, gostaria de ser reconhecido se sou comprador ou vendedor para ter recomendações que melhor atendam  minhas necessidades. | 14 | 1 | 0% |
+|    Alta    | Como comprador, gostaria de ter uma mini apresentação do imóvel, com as características dele, fotos e link da imobiliária.                                                                                                      |      14      |   1    |   0%   |
+|    Alta    | Como cliente, gostaria de receber uma localização aproximada do endereço do imóvel. | 14 | 1 | 0% |
 
 ## 🏅 DoR - Definition of Ready <a id="dor"></a>
 
