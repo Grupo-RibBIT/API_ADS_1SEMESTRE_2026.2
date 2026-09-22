@@ -15,7 +15,6 @@
   <a href ="#us"> User Stories</a>  |   
   <a href ="#dor">DoR</a>  |
   <a href ="#dod">DoD</a>  |
-  <a href ="#equipe"> Equipe</a> |
 </p>
 
 > **Status do Projeto:** Em Desenvolvimento ⏳
@@ -26,11 +25,11 @@
 
 ## 📋 User Stories <a id="us"></a>
 
-| Prioridade | User Story                                                                                                                                                                                   | Story Points | Sprint | Status |
-| :--------: | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :----------: | :----: | :----: |
-|    Alta    | Como comprador, gostaria de encontrar com facilidade os imóveis disponíveis do banco de dados com uma busca básica, para ter mais facilidade ao encontrar um imóvel de acordo com meus parâmetros.             |      20      |   1    |   0%   |
-|    Alta    | Como comprador, gostaria de ter uma mini apresentação do imóvel, com as características dele, fotos e link da imobiliária.                                                                                                      |      14      |   1    |   0%   |
-|    Alta    | Como cliente, gostaria de receber uma localização aproximada do endereço do imóvel. | 14 | 1 | 0% |
+| Ranking | Prioridade | User Story | Story Points | Sprint | Status |
+| :------: | :--------: | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :----------: | :----: | :----: |
+|     1    |    Alta    | Como comprador, gostaria de encontrar com facilidade os imóveis disponíveis do banco de dados com uma busca básica, para ter mais facilidade ao encontrar um imóvel de acordo com meus parâmetros.             |      20      |   1    |   0%   |
+|     4    |    Alta    | Como comprador, gostaria de ter uma mini apresentação do imóvel, com as características dele, fotos e link da imobiliária.                                                                                                      |      14      |   1    |   0%   |
+|     9    |    Alta    | Como cliente, gostaria de receber uma localização aproximada do endereço do imóvel. | 14 | 1 | 0% |
 
 ## 🏅 DoR - Definition of Ready <a id="dor"></a>
 
@@ -54,65 +53,3 @@
 |  Integração com outras partes testadas   | As interfaces entre Telegram e ferramentas locais foram validadas.                   |
 |             Validação do PO              | O Product Owner validou a entrega com base nos critérios definidos.                  |
 |            Implementação                 | A funcionalidade está pronta para ser implementada no produto.                       |
-
-## 🎓 Equipe <a id="equipe"></a>
-
-<div align="center">
-  <table>
-    <tr>
-      <th>Membro</th>
-      <th>Função</th>
-      <th>Github</th>
-    </tr>
-    <tr>
-      <td>Arthur</td>
-      <td>Desenvolvedor</td>
-      <td><a href="https://github.com/ThurraVrd"><img src="https://img.shields.io/badge/github-%23121011.svg?style=for-the-badge&logo=github&logoColor=white"/></a>
-    </tr>
-    <tr>
-      <td>Camila</td>
-      <td>Desenvolvedor</td>
-      <td><a href="https://github.com/camilabernardis"><img src="https://img.shields.io/badge/github-%23121011.svg?style=for-the-badge&logo=github&logoColor=white"/></a>
-    </tr>
-    <tr>
-      <td>Guilherme</td>
-      <td>Desenvolvedor</td>
-      <td><a href="https://github.com/Jmcguicampos2024"><img src="https://img.shields.io/badge/github-%23121011.svg?style=for-the-badge&logo=github&logoColor=white"/></a>
-    </tr>
-    <tr>
-      <td>José</td>
-      <td>Desenvolvedor</td>
-      <td><a href="https://github.com/JBJ3Dart"><img src="https://img.shields.io/badge/github-%23121011.svg?style=for-the-badge&logo=github&logoColor=white"/></a>
-    </tr>
-    <tr>
-      <td>Larissa</td>
-      <td>Desenvolvedor</td>
-      <td><a href="https://github.com/larissaggodoisantos-spec"><img src="https://img.shields.io/badge/github-%23121011.svg?style=for-the-badge&logo=github&logoColor=white"/></a>
-    </tr>
-    <tr>
-      <td>Miguel</td>
-      <td>Desenvolvedor</td>
-      <td><a href="https://github.com/m1guelsoares"><img src="https://img.shields.io/badge/github-%23121011.svg?style=for-the-badge&logo=github&logoColor=white"/></a>
-    </tr>
-    <tr>
-      <td>Thais</td>
-      <td>Desenvolvedor</td>
-      <td><a href="https://github.com/ThaisPiresDosSantos"><img src="https://img.shields.io/badge/github-%23121011.svg?style=for-the-badge&logo=github&logoColor=white"/></a>
-    </tr>
-    <tr>
-      <td>Ulisses</td>
-      <td>Desenvolvedor</td>
-      <td><a href="https://github.com/kikuchi-uli"><img src="https://img.shields.io/badge/github-%23121011.svg?style=for-the-badge&logo=github&logoColor=white"/></a>
-    </tr>
-    <tr>
-      <td>Wilian</td>
-      <td>Desenvolvedor</td>
-      <td><a href="https://github.com/WilianFerraz"><img src="https://img.shields.io/badge/github-%23121011.svg?style=for-the-badge&logo=github&logoColor=white"/></a>
-    </tr>
-    <tr>
-      <td>Vinícius</td>
-      <td>Desenvolvedor</td>
-      <td>-</td>
-    </tr>
-  </table>
-</div>
