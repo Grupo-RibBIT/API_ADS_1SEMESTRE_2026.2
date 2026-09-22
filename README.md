@@ -178,7 +178,7 @@ A solução consiste em um **chatbot para o Telegram integrado com uma Inteligê
       <td>Miguel</td>
       <td>Desenvolvedor</td>
       <td><a href="https://github.com/m1guelsoares"><img src="https://img.shields.io/badge/github-%23121011.svg?style=for-the-badge&logo=github&logoColor=white"/></a>
-      <td><a href="https://github.com/camilabernardis"><img src="https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white"/></a>
+      <td><a href="https://www.linkedin.com/in/mige3e3l-/"><img src="https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white"/></a>
     </tr>
     <tr>
       <td>Thais</td>
