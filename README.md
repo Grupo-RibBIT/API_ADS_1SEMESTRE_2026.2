@@ -23,7 +23,7 @@
   
 </div>
 
-O desafio consiste em desenvolver uma solução que permita clientes consultarem o imenso ecossistema do mercado imobiliário da cidade de São Paulo. Através de uma base CSV pré-existente contendo informações detalhadas sobre apartamentos à venda, incluindo valores, localidades e características específicas dos imóveis, as pessoas devem ser capazes de acharem um apartamento ideal com velocidade e eficiência.
+O desafio consiste em desenvolver uma solução que permita consultar rapidamente o imenso ecossistema do mercado imobiliário da cidade de São Paulo. Através de uma base CSV pré-existente contendo informações detalhadas sobre apartamentos à venda - **incluindo valores, localidades e características específicas dos imóveis** - compradores e vendedores devem ser capazes de encontrar um apartamento ideal com velocidade e eficiência.
 
 <div align="center">
   
@@ -39,17 +39,17 @@ A solução consiste em um **chatbot para o Telegram integrado com uma Inteligê
 
 </div>
 
-| Prioridade | User Story | Esforço (SP) | Sprint | Status |
-| :--: | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :----------: | :----: | :----: |
-| Alta | Como comprador, gostaria de encontrar com facilidade os imóveis disponíveis do banco de dados com uma busca básica, para ter mais facilidade ao encontrar um imóvel de acordo com meus parâmetros. | 20 | 1 | 0% |
-| Alta | Como comprador, gostaria de ter prévias apresentações do imóvel para escolher um que esteja de acordo com as necessidades diárias como pontos de interesse próximos. | 36 | 3 | 0% |
-| Alta | Como vendedor, gostaria de saber quais são os requisitos mais procurados pelos compradores no último mês ou semana (utilizando um contador de especificidades). | 60 | 3 | 0% |
-| Média | Como vendedor ou comprador, gostaria de ter acesso a notícias recentes relacionadas à pesquisa no banco de dados para especulação imobiliária (saúde pública, pragas, criminalidade, infraestrutura, etc).  | 14 | 1 | 0% |
-| Média | Como Comprador ou Vendedor, gostaria de um ID de usuário, para que minhas buscas sejam salvas e eu consiga continuar as minhas pesquisas. | 60 | 3 | 0% |
-| Média | Como comprador, gostaria de me comunicar com o chatbot por áudio para ser acessível para um maior número de pessoas. | 65 | 2 | 0% |
-| Baixa | Como vendedor, gostaria de ser informado quando a ia não tiver as informações necessárias para que eu possa acrescentar no banco de dados. (ex: piscina no imóvel, quadra, condomínio, etc) | 36 | 2 | 0% |
-| Baixa | Como comprador, gostaria de ter um link aproximado do google maps para que possa ver a localização aproximada dos imóveis visualmente. | 45 | 2 | 0% |
-| Baixa | Como cliente, gostaria de ser reconhecido se sou comprador ou vendedor para ter recomendações que melhor atendam  minhas necessidades. | 14 | 1 | 0% |
+| Ranking | Prioridade | User Story | Esforço (SP) | Sprint | Status |
+| :-----: | :--------: | :--- | :----------: | :----: | :----: |
+| 1 | Alta | Como comprador, gostaria de encontrar com facilidade os imóveis disponíveis do banco de dados com uma busca básica, para ter mais facilidade ao encontrar um imóvel de acordo com meus parâmetros. | 20 | 1 | 0% |
+| 2 | Baixa | Como comprador, gostaria de ter prévias apresentações do imóvel para escolher um que esteja de acordo com as necessidades diárias como pontos de interesse próximos. | 36 | 3 | 0% |
+| 3 | Baixa | Como vendedor, gostaria de saber quais são os requisitos mais procurados pelos compradores no último mês ou semana (utilizando um contador de especificidades). | 60 | 3 | 0% |
+| 4 | Alta | Como vendedor ou comprador, gostaria de ter acesso a notícias recentes relacionadas à pesquisa no banco de dados para especulação imobiliária (saúde pública, pragas, criminalidade, infraestrutura, etc). | 14 | 1 | 0% |
+| 5 | Baixa | Como Comprador ou Vendedor, gostaria de um ID de usuário, para que minhas buscas sejam salvas e eu consiga continuar as minhas pesquisas. | 60 | 3 | 0% |
+| 6 | Média | Como comprador, gostaria de me comunicar com o chatbot por áudio para ser acessível para um maior número de pessoas. | 65 | 2 | 0% |
+| 7 | Média | Como vendedor, gostaria de ser informado quando a ia não tiver as informações necessárias para que eu possa acrescentar no banco de dados. (ex: piscina no imóvel, quadra, condomínio, etc) | 36 | 2 | 0% |
+| 8 | Média | Como comprador, gostaria de ter um link aproximado do google maps para que possa ver a localização aproximada dos imóveis visualmente. | 45 | 2 | 0% |
+| 9 | Alta | Como cliente, gostaria de ser reconhecido se sou comprador ou vendedor para ter recomendações que melhor atendam minhas necessidades. | 14 | 1 | 0% |
 
 
 <div align="center">
@@ -134,9 +134,7 @@ A solução consiste em um **chatbot para o Telegram integrado com uma Inteligê
 
 <div align="center">
   
-## Equipe <a id="equipe"></a>
-
-</div>
+## 🎓 Equipe <a id="equipe"></a>
 
 <div align="center">
   <table>
@@ -144,56 +142,67 @@ A solução consiste em um **chatbot para o Telegram integrado com uma Inteligê
       <th>Membro</th>
       <th>Função</th>
       <th>Github</th>
+      <th>LinkedIn</th>
+    </tr>
+    <tr>
+      <td>Camila</td>
+      <td>Product Owner</td>
+      <td><a href="https://github.com/camilabernardis"><img src="https://img.shields.io/badge/github-%23121011.svg?style=for-the-badge&logo=github&logoColor=white"/></a>
+      <td><a href="https://www.linkedin.com/in/camila-bernardi-ti-"><img src="https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white"/></a>
+    </tr>
+    <tr>
+      <td>José</td>
+      <td>Scrum Master</td>
+      <td><a href="https://github.com/JBJ3Dart"><img src="https://img.shields.io/badge/github-%23121011.svg?style=for-the-badge&logo=github&logoColor=white"/></a>
+      <td><a href="https://www.linkedin.com/in/jjuliatti"><img src="https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white"/></a>
     </tr>
     <tr>
       <td>Arthur</td>
       <td>Desenvolvedor</td>
       <td><a href="https://github.com/ThurraVrd"><img src="https://img.shields.io/badge/github-%23121011.svg?style=for-the-badge&logo=github&logoColor=white"/></a>
-    </tr>
-    <tr>
-      <td>Camila</td>
-      <td>Desenvolvedor</td>
-      <td><a href="https://github.com/camilabernardis"><img src="https://img.shields.io/badge/github-%23121011.svg?style=for-the-badge&logo=github&logoColor=white"/></a>
+      <td><a href=" "><img src="https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white"/></a>
     </tr>
     <tr>
       <td>Guilherme</td>
       <td>Desenvolvedor</td>
       <td><a href="https://github.com/Jmcguicampos2024"><img src="https://img.shields.io/badge/github-%23121011.svg?style=for-the-badge&logo=github&logoColor=white"/></a>
-    </tr>
-    <tr>
-      <td>José</td>
-      <td>Desenvolvedor</td>
-      <td><a href="https://github.com/JBJ3Dart"><img src="https://img.shields.io/badge/github-%23121011.svg?style=for-the-badge&logo=github&logoColor=white"/></a>
+      <td><a href="https://www.linkedin.com/in/guilherme-baleeiro-gonçalves-de-campos-070aa9433?utm_source=share_via&utm_content=profile&utm_medium=member_android"><img src="https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white"/></a>
     </tr>
     <tr>
       <td>Larissa</td>
       <td>Desenvolvedor</td>
       <td><a href="https://github.com/larissaggodoisantos-spec"><img src="https://img.shields.io/badge/github-%23121011.svg?style=for-the-badge&logo=github&logoColor=white"/></a>
+      <td><a href="https://www.linkedin.com/in/larissa-godoi"><img src="https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white"/></a>
     </tr>
     <tr>
       <td>Miguel</td>
       <td>Desenvolvedor</td>
       <td><a href="https://github.com/m1guelsoares"><img src="https://img.shields.io/badge/github-%23121011.svg?style=for-the-badge&logo=github&logoColor=white"/></a>
+      <td><a href="https://github.com/camilabernardis"><img src="https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white"/></a>
     </tr>
     <tr>
       <td>Thais</td>
       <td>Desenvolvedor</td>
       <td><a href="https://github.com/ThaisPiresDosSantos"><img src="https://img.shields.io/badge/github-%23121011.svg?style=for-the-badge&logo=github&logoColor=white"/></a>
+      <td><a href="https://www.linkedin.com/in/thais-pires-dos-santos?utm_source=share_via&utm_content=profile&utm_medium=member_android"><img src="https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white"/></a>
     </tr>
     <tr>
       <td>Ulisses</td>
       <td>Desenvolvedor</td>
       <td><a href="https://github.com/kikuchi-uli"><img src="https://img.shields.io/badge/github-%23121011.svg?style=for-the-badge&logo=github&logoColor=white"/></a>
+      <td><a href="https://linkedin.com/in/ulisses-kikuchi"><img src="https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white"/></a>
     </tr>
     <tr>
       <td>Wilian</td>
       <td>Desenvolvedor</td>
       <td><a href="https://github.com/WilianFerraz"><img src="https://img.shields.io/badge/github-%23121011.svg?style=for-the-badge&logo=github&logoColor=white"/></a>
+      <td><a href="https://www.linkedin.com/in/wilian-ferraz-mancilha-587a6619b?utm_source=share_via&utm_content=profile&utm_medium=member_android"><img src="https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white"/></a>
     </tr>
     <tr>
       <td>Vinícius</td>
       <td>Desenvolvedor</td>
       <td><a href="https://github.com/viniconst85"><img src="https://img.shields.io/badge/github-%23121011.svg?style=for-the-badge&logo=github&logoColor=white"/></a>
+      <td><a href="https://www.linkedin.com/in/vinicius-constantino-b3312a1a7"><img src="https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white"/></a>
     </tr>
   </table>
 </div>
