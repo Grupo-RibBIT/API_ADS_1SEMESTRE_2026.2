@@ -160,7 +160,7 @@ A solução consiste em um **chatbot para o Telegram integrado com uma Inteligê
       <td>Arthur</td>
       <td>Desenvolvedor</td>
       <td><a href="https://github.com/ThurraVrd"><img src="https://img.shields.io/badge/github-%23121011.svg?style=for-the-badge&logo=github&logoColor=white"/></a>
-      <td><a href=" "><img src="https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white"/></a>
+      <td><a href="https://www.linkedin.com/in/arthurvrd1/"><img src="https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white"/></a>
     </tr>
     <tr>
       <td>Guilherme</td>
@@ -172,7 +172,7 @@ A solução consiste em um **chatbot para o Telegram integrado com uma Inteligê
       <td>Larissa</td>
       <td>Desenvolvedor</td>
       <td><a href="https://github.com/larissaggodoisantos-spec"><img src="https://img.shields.io/badge/github-%23121011.svg?style=for-the-badge&logo=github&logoColor=white"/></a>
-      <td><a href="https://www.linkedin.com/in/larissa-godoi"><img src="https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white"/></a>
+      <td><a href="https://www.linkedin.com/in/larissa-godoi-95682b306/"><img src="https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white"/></a>
     </tr>
     <tr>
       <td>Miguel</td>
