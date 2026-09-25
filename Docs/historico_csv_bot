@@ -1,0 +1,455 @@
+import random
+import re
+import dspy
+from geopy.geocoders import Nominatim
+import pandas as pd
+import telebot
+from telebot import types
+
+# ==============================================================================
+# 1. CONFIGURAÇÕES E INICIALIZAÇÃO
+# ==============================================================================
+
+API_TOKEN = "8628398211:AAHaP3hUizrYap7uJ2HUoJk_R1rfKanzhzw"
+bot = telebot.TeleBot(API_TOKEN)
+
+# Configuração do modelo local via Ollama (Qwen 2.5 Coder 7B)
+lm = dspy.LM(
+    "ollama_chat/qwen2.5-coder:7b",
+    api_base="http://localhost:11434",
+    api_key="ignored",
+)
+dspy.configure(lm=lm)
+
+geolocator = Nominatim(user_agent="Bottelegram")
+
+user_roles = {}
+historico_conversa = []
+caminho_csv_global = "apartamentos_sp_estruturado.csv"
+list_fotos_apt = ["kamen-nikolov-fin", "maxim-dorokhov", "valmik-shah"]
+
+
+def salvar_no_historico(remetente: str, texto: str):
+    """Armazena até 10 mensagens recentes na memória e imprime no terminal."""
+    historico_conversa.append(f"{remetente}: {texto}")
+    if len(historico_conversa) > 10:
+        historico_conversa.pop(0)
+
+    print("\n--- HISTÓRICO ATUALIZADO (MÁX 10 MENSAGENS) ---")
+    for msg in historico_conversa:
+        print(msg)
+    print("----------------------------------------------\n")
+
+
+def formatar_valor_br(val) -> str:
+    """Padroniza rigorosamente qualquer formato de preço do CSV para 'R$ X.XXX.XXX'."""
+    val_str = str(val)
+    numeros = re.sub(r"[^\d]", "", val_str)
+    if numeros:
+        v = int(numeros)
+        return f"R$ {v:,.0f}".replace(",", ".")
+    return "Consulte"
+
+
+# ==============================================================================
+# 2. FILTROS DE CONSULTA AO CSV (PANDAS - RETORNA DATAFRAME DE ATÉ 5 RESULTADOS)
+# ==============================================================================
+
+
+def extrair_numeros(texto: str) -> list[float]:
+    """Extrai números do texto, tratando termos como 'mil' (ex: '500 mil' -> 500000)."""
+    texto_lower = texto.lower()
+    texto_trabalhado = re.sub(
+        r"(\d+)\s*mil", lambda m: str(int(m.group(1)) * 1000), texto_lower
+    )
+    texto_limpo = re.sub(r"\.(?=\d{3})", "", texto_trabalhado)
+    numeros = re.findall(r"\d+", texto_limpo)
+    return [float(n) for n in numeros]
+
+
+def executar_filtro_csv(
+    filtro: str,
+    texto_usuario: str = "",
+    caminho_csv: str = caminho_csv_global,
+) -> pd.DataFrame:
+    print(
+        f"\n[Filtro] Buscando no CSV por: Filtro='{filtro}',"
+        f" Entrada='{texto_usuario}'..."
+    )
+    try:
+        df = pd.read_csv(caminho_csv)
+    except Exception as e:
+        print(f"[Erro CSV] Falha ao ler o arquivo: {e}")
+        return pd.DataFrame()
+
+    resultado = pd.DataFrame()
+
+    if filtro == "Postagem" and "postagem" in df.columns:
+        df = df.dropna(subset=["postagem"])
+        resultado = df[
+            df["postagem"]
+            .astype(str)
+            .str.contains(texto_usuario, case=False, na=False)
+        ]
+
+    elif filtro == "Preço" and "preco" in df.columns:
+        df = df.dropna(subset=["preco"])
+        df["preco_num"] = (
+            df["preco"]
+            .astype(str)
+            .str.replace(r"[^\d,.]", "", regex=True)
+            .str.replace(".", "", regex=False)
+            .str.replace(",", ".", regex=False)
+        )
+        df["preco_num"] = pd.to_numeric(df["preco_num"], errors="coerce")
+        df = df.dropna(subset=["preco_num"])
+
+        valores = extrair_numeros(texto_usuario)
+        if valores:
+            if len(valores) >= 2:
+                v_min, v_max = min(valores[0], valores[1]), max(
+                    valores[0], valores[1]
+                )
+                resultado = df[
+                    (df["preco_num"] >= v_min) & (df["preco_num"] <= v_max)
+                ]
+            else:
+                resultado = df[df["preco_num"] <= valores[0]]
+
+    elif filtro == "Abaixo do preço" and "abaixo_do_preco" in df.columns:
+        df = df.dropna(subset=["abaixo_do_preco"])
+        resultado = df[
+            df["abaixo_do_preco"]
+            .astype(str)
+            .str.contains("sim|true|1|abaixo", case=False, na=False)
+        ]
+
+    elif filtro == "Área" and "Área" in df.columns:
+        df = df.dropna(subset=["Área"])
+        df["area_num"] = pd.to_numeric(
+            df["Área"].astype(str).str.extract(r"(\d+)")[0], errors="coerce"
+        )
+        df = df.dropna(subset=["area_num"])
+        valores = extrair_numeros(texto_usuario)
+        if valores:
+            resultado = df[df["area_num"] >= valores[0]]
+
+    elif filtro == "Endereço" and "Endereco" in df.columns:
+        df = df.dropna(subset=["Endereco"])
+        resultado = df[
+            df["Endereco"]
+            .astype(str)
+            .str.contains(texto_usuario, case=False, na=False)
+        ]
+
+    elif filtro == "Quartos" and "Quartos" in df.columns:
+        df = df.dropna(subset=["Quartos"])
+        df["quartos_num"] = pd.to_numeric(
+            df["Quartos"].astype(str).str.extract(r"(\d+)")[0], errors="coerce"
+        )
+        valores = extrair_numeros(texto_usuario)
+        if valores:
+            resultado = df[df["quartos_num"] >= int(valores[0])]
+
+    elif filtro == "Banheiros" and "Banheiros" in df.columns:
+        df = df.dropna(subset=["Banheiros"])
+        df["banheiros_num"] = pd.to_numeric(
+            df["Banheiros"].astype(str).str.extract(r"(\d+)")[0],
+            errors="coerce",
+        )
+        valores = extrair_numeros(texto_usuario)
+        if valores:
+            resultado = df[df["banheiros_num"] >= int(valores[0])]
+
+    elif filtro == "Garagem" and "Vagas_de_estacionamento" in df.columns:
+        df = df.dropna(subset=["Vagas_de_estacionamento"])
+        df["vagas_num"] = pd.to_numeric(
+            df["Vagas_de_estacionamento"].astype(str).str.extract(r"(\d+)")[0],
+            errors="coerce",
+        )
+        valores = extrair_numeros(texto_usuario)
+        if valores:
+            resultado = df[df["vagas_num"] >= int(valores[0])]
+
+    if not resultado.empty:
+        print(f"[Filtro CSV] {len(resultado.head(5))} imóveis retornados.")
+        return resultado.head(5)
+    else:
+        print("[Filtro CSV] Nenhum imóvel encontrado para estes critérios.")
+        return pd.DataFrame()
+
+
+# ==============================================================================
+# 3. ESTRUTURA DSPY E FERRAMENTAS
+# ==============================================================================
+
+
+class DescriçãoApartamento(dspy.Signature):
+    """Traduz a linha do csv em características estruturadas do imóvel."""
+
+    linha_do_csv: str = dspy.InputField()
+    banheiros: int = dspy.OutputField()
+    quartos: int = dspy.OutputField()
+    área: int = dspy.OutputField()
+    estacionamento: int = dspy.OutputField()
+    endereço_apartamento: str = dspy.OutputField(
+        desc="Endereço obtido da coluna Endereco do CSV"
+    )
+
+
+class RespostaCliente(dspy.Signature):
+    """Gera uma mensagem de fechamento amigável para o cliente."""
+
+    dados_imoveis: str = dspy.InputField(desc="Opções de imóveis encontradas no CSV")
+    historico_conversa: str = dspy.InputField(desc="Histórico recente das últimas mensagens")
+    mensagem_usuario: str = dspy.InputField(desc="Última mensagem enviada pelo cliente")
+    resposta_final: str = dspy.OutputField(
+        desc="Mensagem de encerramento amigável convidando o cliente para agendar visita"
+    )
+
+
+def montar_mini_apresentação_e_mandar_pelo_telegram(
+    fotos: str,
+    num_banheiros: int,
+    num_quartos: int,
+    num_estacionamento: int,
+    área: int,
+    valor_formatado: str,
+    endereco_imovel: str,
+    chat_id_telegram,
+    indice: int = 1,
+):
+    modelo_layout = f"""
+  <tg-slideshow>
+
+  ![](https://raw.githubusercontent.com/Grupo-RibBIT/arquivo-base/refs/heads/main/fotos_exemplo_apt/{fotos}-1.jpg)
+  ![](https://raw.githubusercontent.com/Grupo-RibBIT/arquivo-base/refs/heads/main/fotos_exemplo_apt/{fotos}-2.jpg)
+  ![](https://raw.githubusercontent.com/Grupo-RibBIT/arquivo-base/refs/heads/main/fotos_exemplo_apt/{fotos}-3.jpg)
+
+  </tg-slideshow>
+
+  #Opção #{indice} - Apartamento
+  ######Valor de Compra: =={valor_formatado}==
+
+  | Infos do Apartamento | |
+  |:---------|:--------:|
+  | Área Útil| {área} m² |
+  | Quartos | {num_quartos} |
+  | Banheiros | {num_banheiros} |
+  | Vagas de Estacionamento | {num_estacionamento} |
+
+  ###Destaques:
+  - **Endereço:** {endereco_imovel}
+  - Imóvel filtrado de acordo com a sua busca
+  >**Para mais informações**: [Site da Imobiliária](https://github.com/Grupo-RibBIT)
+  """
+    apresentação = telebot.types.InputRichMessage(markdown=modelo_layout)
+    bot.send_rich_message(chat_id_telegram, apresentação)
+
+
+def enviar_localizacao_no_telegram(endereço_apartamento, chat_id_telegram):
+    print(f"[Geopy] Obtendo coordenadas para: {endereço_apartamento}")
+    try:
+        endereco = geolocator.geocode(endereço_apartamento)
+        if endereco:
+            bot.send_location(
+                chat_id=chat_id_telegram,
+                latitude=endereco.latitude,
+                longitude=endereco.longitude,
+            )
+            print(
+                f"[Geopy] Coordenadas enviadas: {endereco.latitude},"
+                f" {endereco.longitude}"
+            )
+        else:
+            print("[Geopy] Endereço não encontrado no OpenStreetMap.")
+    except Exception as e:
+        print(f"[Geopy Erro] {e}")
+
+
+# ==============================================================================
+# 4. MÓDULO PRINCIPAL DSPY (POSTAGEM EM LOTE OTIMIZADA)
+# ==============================================================================
+
+
+class BotImobiliária(dspy.Module):
+
+    def __init__(self):
+        super().__init__()
+        self.arquiteto = dspy.ChainOfThought(DescriçãoApartamento)
+        self.finalizador = dspy.ChainOfThought(RespostaCliente)
+
+    def forward(self, mensagem, df_filtrado: pd.DataFrame) -> str:
+        chat_id = mensagem.chat.id
+
+        if df_filtrado.empty:
+            texto_historico = "\n".join(historico_conversa)
+            res = self.finalizador(
+                dados_imoveis="Nenhum imóvel encontrado",
+                historico_conversa=texto_historico,
+                mensagem_usuario=mensagem.text,
+            )
+            bot.send_message(chat_id, res.resposta_final)
+            return res.resposta_final
+
+        # Envia os cards em lote para todos os imóveis encontrados
+        for idx, (_, linha) in enumerate(df_filtrado.iterrows(), 1):
+            linha_csv_str = linha.to_frame().T.to_csv(index=False)
+
+            print(f"\n[IA - Etapa 1] Processando imóvel #{idx}...")
+            caracteristicas = self.arquiteto(linha_do_csv=linha_csv_str)
+
+            endereco_exibicao = getattr(
+                caracteristicas,
+                "endereço_apartamento",
+                str(linha.get("Endereco", "Endereço não especificado")),
+            )
+
+            # FORMATAÇÃO RÍGIDA DE PREÇO VIA PYTHON
+            valor_formatado = formatar_valor_br(linha.get("preco", ""))
+
+            slides = list_fotos_apt[random.randint(0, 2)]
+
+            # 1. Envia a apresentação visual do imóvel
+            montar_mini_apresentação_e_mandar_pelo_telegram(
+                fotos=slides,
+                num_banheiros=caracteristicas.banheiros,
+                num_quartos=caracteristicas.quartos,
+                num_estacionamento=caracteristicas.estacionamento,
+                área=caracteristicas.área,
+                valor_formatado=valor_formatado,
+                endereco_imovel=endereco_exibicao,
+                chat_id_telegram=chat_id,
+                indice=idx,
+            )
+
+            # 2. Envia a localização no mapa
+            if (
+                endereco_exibicao
+                and endereco_exibicao != "Endereço não especificado"
+            ):
+                enviar_localizacao_no_telegram(endereco_exibicao, chat_id)
+
+        # 3. Finalização: Gera a mensagem cortês de fechamento informando que encontrou as opções
+        texto_historico = "\n".join(historico_conversa)
+        print("\n[IA - Etapa 2] Gerando mensagem de fechamento...")
+        res = self.finalizador(
+            dados_imoveis=df_filtrado.to_csv(index=False),
+            historico_conversa=texto_historico,
+            mensagem_usuario=mensagem.text,
+        )
+
+        bot.send_message(chat_id, res.resposta_final)
+        return res.resposta_final
+
+
+bot_recepção = BotImobiliária()
+
+
+# ==============================================================================
+# 5. HANDLERS TELEGRAM
+# ==============================================================================
+
+
+@bot.message_handler(commands=["iniciar", "ajuda", "start"])
+def send_welcome(message):
+    markup = types.InlineKeyboardMarkup(row_width=2)
+    botoes = [
+        types.InlineKeyboardButton(text="Preço", callback_data="role_preço"),
+        types.InlineKeyboardButton(
+            text="Postagem", callback_data="role_postagem"
+        ),
+        types.InlineKeyboardButton(
+            text="Abaixo do preço", callback_data="role_abaixo_do_preço"
+        ),
+        types.InlineKeyboardButton(text="Área", callback_data="role_area"),
+        types.InlineKeyboardButton(
+            text="Endereço", callback_data="role_endereço"
+        ),
+        types.InlineKeyboardButton(text="Quartos", callback_data="role_quartos"),
+        types.InlineKeyboardButton(
+            text="Banheiros", callback_data="role_banheiros"
+        ),
+        types.InlineKeyboardButton(
+            text="Garagem", callback_data="role_garagem"
+        ),
+    ]
+    markup.add(*botoes)
+    bot.send_message(
+        message.chat.id,
+        "Olá! Selecione o Filtro desejado para encontrar seu imóvel:",
+        reply_markup=markup,
+    )
+
+
+@bot.callback_query_handler(func=lambda call: call.data.startswith("role_"))
+def callback_role(call):
+    chat_id = call.message.chat.id
+    papeis = {
+        "role_preço": "Preço",
+        "role_postagem": "Postagem",
+        "role_abaixo_do_preço": "Abaixo do preço",
+        "role_area": "Área",
+        "role_endereço": "Endereço",
+        "role_quartos": "Quartos",
+        "role_banheiros": "Banheiros",
+        "role_garagem": "Garagem",
+    }
+    escolha = papeis.get(call.data)
+    if escolha:
+        user_roles[chat_id] = escolha
+        print(f"\n[Telegram] Usuário {chat_id} selecionou o filtro: {escolha}")
+
+        if escolha == "Abaixo do preço":
+            bot.send_message(
+                chat_id, "Buscando oportunidades abaixo do preço..."
+            )
+            df_resultado = executar_filtro_csv(filtro="Abaixo do preço")
+            resposta_bot = bot_recepção(
+                mensagem=call.message, df_filtrado=df_resultado
+            )
+            salvar_no_historico("Bot", resposta_bot)
+        else:
+            bot.send_message(
+                chat_id,
+                f"Você escolheu o filtro *{escolha}*. Envie os detalhes da"
+                " busca.",
+                parse_mode="Markdown",
+            )
+
+    bot.edit_message_reply_markup(
+        chat_id, call.message.message_id, reply_markup=None
+    )
+
+
+@bot.message_handler(func=lambda message: True)
+def processar_mensagem_com_ia(message):
+    chat_id = message.chat.id
+    texto_usuario = message.text
+
+    print(f"\n[Telegram] Mensagem recebida de {chat_id}: '{texto_usuario}'")
+
+    salvar_no_historico("Usuário", texto_usuario)
+
+    filtro_ativo = user_roles.get(chat_id)
+
+    if not filtro_ativo:
+        msg_alerta = "Por favor, digite /start e escolha um filtro para iniciar."
+        bot.send_message(chat_id, msg_alerta)
+        salvar_no_historico("Bot", msg_alerta)
+        return
+
+    # 1. Executa filtro no Pandas retornando os resultados em um DataFrame
+    df_filtrado = executar_filtro_csv(
+        filtro=filtro_ativo, texto_usuario=texto_usuario
+    )
+
+    # 2. Executa a IA e faz as postagens dos cards em lote
+    resposta_final = bot_recepção(mensagem=message, df_filtrado=df_filtrado)
+
+    salvar_no_historico("Bot", resposta_final)
+
+
+if __name__ == "__main__":
+    print("🤖 Bot Imobiliário Otimizado Ativo e Escutando...")
+    bot.polling(non_stop=True)
