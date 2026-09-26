@@ -15,23 +15,20 @@
   <a href ="#us"> User Stories</a>  |   
   <a href ="#dor">DoR</a>  |
   <a href ="#dod">DoD</a>  |
-  <a href ="#equipe"> Equipe</a> |
 </p>
 
 > **Status do Projeto:** Em Desenvolvimento ⏳
 
 ## 🏅 Desafio <a id="desafio"></a>
 
-**Refinar a experiência e acessibilidade do usuário no Chatbot através de comandos de voz, segmentação de perfis e enriquecimento visual com mapas.** O objetivo principal desta entrega é evoluir a maturidade do bot, permitindo interações mais inclusivas (comunicação por áudio), a separação clara de fluxos de jornada para compradores e vendedores, além da implementação de geolocalização e de mecanismos de alertas automatizados de IA para a complementação de dados do banco.
+**Refinar a experiência e acessibilidade do usuário no Chatbot através de comandos de voz e segmentação de perfis.** O objetivo principal desta entrega é evoluir a maturidade do bot, permitindo interações mais inclusivas (comunicação por áudio), a separação clara de fluxos de jornada para compradores e vendedores.
 
 ## 📋 User Stories <a id="us"></a>
 
-| Prioridade | User Story                                                                                                                                                                                   | Story Points | Sprint | Status |
-| :--------: | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :----------: | :----: | :----: |
-|    Média   | Como comprador, gostaria de me comunicar com o chatbot por áudio para ser acessível para um maior número de pessoas.                                                                         |      65      |   2    |   ⏳   |
-|    Baixa   | Como vendedor, gostaria de ser informado quando a ia não tiver as informações necessárias para que eu possa acrescentar no banco de dados. (ex: piscina no imóvel, quadra, condomínio, etc)  |      36      |   2    |   ⏳   |
-|    Baixa   | Como comprador, gostaria de ter um link aproximado do google maps para que possa ver a localização aproximada dos imóveis visualmente.                                                       |      45      |   2    |   ⏳   |
-|    Baixa   | Como usuário, gostaria de selecionar se sou comprador ou vendedor para ter acessos específicos no chatbot.                                                                                   |      20      |   2    |   ⏳   |
+| Ranking | Prioridade | User Story | Story Points | Sprint | Status |
+| :------: | :--------: | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :----------: | :----: | :----: |
+| 6 | Média | Como comprador, gostaria de me comunicar com o chatbot por áudio para ser acessível para um maior número de pessoas. | 30 | 2 | 0% |
+| 7 | Média | Como vendedor, gostaria de ser informado quando a ia não tiver as informações necessárias para que eu possa acrescentar no banco de dados. (ex: piscina no imóvel, quadra, condomínio, etc) | 20 | 2 | 0% |
 
 ## 🏅 DoR - Definition of Ready <a id="dor"></a>
 
@@ -58,65 +55,6 @@
 | Build/Testes automatiados (se aplicável) | A funcionalidade não quebra a aplicação e passa nos testes automatizados existentes. |
 |             Validação do PO              | O Product Owner validou a entrega com base nos critérios definidos.                  |
 |            Pronto para deploy            | O item está testado, validado e pode ser integrado ao produto final.                 |
-
-## 🎓 Equipe <a id="equipe"></a>
-
-<div align="center">
-  <table>
-    <tr>
-      <th>Membro</th>
-      <th>Função</th>
-      <th>Github</th>
-    </tr>
-    <tr>
-      <td>Arthur</td>
-      <td>Desenvolvedor</td>
-      <td><a href="https://github.com/ThurraVrd"><img src="https://img.shields.io/badge/github-%23121011.svg?style=for-the-badge&logo=github&logoColor=white"/></a>
-    </tr>
-    <tr>
-      <td>Camila</td>
-      <td>Desenvolvedor</td>
-      <td><a href="https://github.com/camilabernardis"><img src="https://img.shields.io/badge/github-%23121011.svg?style=for-the-badge&logo=github&logoColor=white"/></a>
-    </tr>
-    <tr>
-      <td>Guilherme</td>
-      <td>Desenvolvedor</td>
-      <td><a href="https://github.com/Jmcguicampos2024"><img src="https://img.shields.io/badge/github-%23121011.svg?style=for-the-badge&logo=github&logoColor=white"/></a>
-    </tr>
-    <tr>
-      <td>José</td>
-      <td>Desenvolvedor</td>
-      <td><a href="https://github.com/JBJ3Dart"><img src="https://img.shields.io/badge/github-%23121011.svg?style=for-the-badge&logo=github&logoColor=white"/></a>
-    </tr>
-    <tr>
-      <td>Larissa</td>
-      <td>Desenvolvedor</td>
-      <td><a href="https://github.com/larissaggodoisantos-spec"><img src="https://img.shields.io/badge/github-%23121011.svg?style=for-the-badge&logo=github&logoColor=white"/></a>
-    </tr>
-    <tr>
-      <td>Miguel</td>
-      <td>Desenvolvedor</td>
-      <td><a href="https://github.com/m1guelsoares"><img src="https://img.shields.io/badge/github-%23121011.svg?style=for-the-badge&logo=github&logoColor=white"/></a>
-    </tr>
-    <tr>
-      <td>Thais</td>
-      <td>Desenvolvedor</td>
-      <td><a href="https://github.com/ThaisPiresDosSantos"><img src="https://img.shields.io/badge/github-%23121011.svg?style=for-the-badge&logo=github&logoColor=white"/></a>
-    </tr>
-    <tr>
-      <td>Ulisses</td>
-      <td>Desenvolvedor</td>
-      <td><a href="https://github.com/kikuchi-uli"><img src="https://img.shields.io/badge/github-%23121011.svg?style=for-the-badge&logo=github&logoColor=white"/></a>
-    </tr>
-    <tr>
-      <td>Wilian</td>
-      <td>Desenvolvedor</td>
-      <td><a href="https://github.com/WilianFerraz"><img src="https://img.shields.io/badge/github-%23121011.svg?style=for-the-badge&logo=github&logoColor=white"/></a>
-    </tr>
-    <tr>
-      <td>Vinícius</td>
-      <td>Desenvolvedor</td>
-      <td>-</td>
     </tr>
   </table>
 </div>
