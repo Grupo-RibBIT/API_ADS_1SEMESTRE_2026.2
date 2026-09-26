@@ -46,10 +46,10 @@ A solução consiste em um **chatbot para o Telegram integrado com uma Inteligê
 | 3 | Baixa | Como vendedor, gostaria de saber quais são os requisitos mais procurados pelos compradores no último mês ou semana (utilizando um contador de especificidades). | 60 | 3 | 0% |
 | 4 | Alta | Como vendedor ou comprador, gostaria de ter acesso a notícias recentes relacionadas à pesquisa no banco de dados para especulação imobiliária (saúde pública, pragas, criminalidade, infraestrutura, etc). | 14 | 1 | 0% |
 | 5 | Baixa | Como Comprador ou Vendedor, gostaria de um ID de usuário, para que minhas buscas sejam salvas e eu consiga continuar as minhas pesquisas. | 60 | 3 | 0% |
-| 6 | Média | Como comprador, gostaria de me comunicar com o chatbot por áudio para ser acessível para um maior número de pessoas. | 65 | 2 | 0% |
-| 7 | Média | Como vendedor, gostaria de ser informado quando a ia não tiver as informações necessárias para que eu possa acrescentar no banco de dados. (ex: piscina no imóvel, quadra, condomínio, etc) | 36 | 2 | 0% |
-| 8 | Média | Como comprador, gostaria de ter um link aproximado do google maps para que possa ver a localização aproximada dos imóveis visualmente. | 45 | 2 | 0% |
-| 9 | Alta | Como cliente, gostaria de ser reconhecido se sou comprador ou vendedor para ter recomendações que melhor atendam minhas necessidades. | 14 | 1 | 0% |
+| 6 | Média | Como comprador, gostaria de me comunicar com o chatbot por áudio para ser acessível para um maior número de pessoas. | 30 | 2 | 0% |
+| 7 | Média | Como vendedor, gostaria de ser informado quando a ia não tiver as informações necessárias para que eu possa acrescentar no banco de dados. (ex: piscina no imóvel, quadra, condomínio, etc) | 20 | 2 | 0% |
+| 8 | Alta  | Como cliente, gostaria de receber uma localização aproximada do endereço do imóvel. | 14 | 1 | 0% |
+| 9 | Baixa | Como cliente, gostaria de ser reconhecido se sou comprador ou vendedor para ter recomendações que melhor atendam minhas necessidades. | 14 | 3 | 0% |
 
 
 <div align="center">
