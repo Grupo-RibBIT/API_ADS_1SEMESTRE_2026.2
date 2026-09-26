@@ -55,6 +55,3 @@
 | Build/Testes automatiados (se aplicável) | A funcionalidade não quebra a aplicação e passa nos testes automatizados existentes. |
 |             Validação do PO              | O Product Owner validou a entrega com base nos critérios definidos.                  |
 |            Pronto para deploy            | O item está testado, validado e pode ser integrado ao produto final.                 |
-    </tr>
-  </table>
-</div>
