@@ -21,15 +21,15 @@
 
 ## 🏅 Desafio <a id="desafio"></a>
 
-**Implementar a infraestrutura base do Chatbot no Telegram focado em Imóveis (SP) e o sistema de busca essencial.** O objetivo principal desta entrega é permitir que o usuário realize consultas de imóveis disponíveis através de filtros básicos na interface do bot, além de estruturar os módulos iniciais para o consumo e exibição de notícias gerais sobre o mercado imobiliário e dados regionais (saúde pública, criminalidade e infraestrutura).
+**Implementar a infraestrutura base do Chatbot no Telegram focado em Imóveis (SP) e o sistema de busca essencial.** O objetivo principal desta entrega é permitir que o usuário realize consultas de imóveis disponíveis através de filtros básicos na interface do bot, além de estruturar os módulos iniciais para o consumo e exibição.
 
 ## 📋 User Stories <a id="us"></a>
 
 | Ranking | Prioridade | User Story | Story Points | Sprint | Status |
 | :------: | :--------: | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :----------: | :----: | :----: |
-|     1    |    Alta    | Como comprador, gostaria de encontrar com facilidade os imóveis disponíveis do banco de dados com uma busca básica, para ter mais facilidade ao encontrar um imóvel de acordo com meus parâmetros.             |      20      |   1    |   0%   |
-|     4    |    Alta    | Como comprador, gostaria de ter uma mini apresentação do imóvel, com as características dele, fotos e link da imobiliária.                                                                                                      |      14      |   1    |   0%   |
-|     9    |    Alta    | Como cliente, gostaria de receber uma localização aproximada do endereço do imóvel. | 14 | 1 | 0% |
+|     1    |    Alta    | Como comprador, gostaria de encontrar com facilidade os imóveis disponíveis do banco de dados com uma busca básica, para ter mais facilidade ao encontrar um imóvel de acordo com meus parâmetros.             |      20      |   1    |   100%   |
+|     4    |    Alta    | Como comprador, gostaria de ter uma mini apresentação do imóvel, com as características dele, fotos e link da imobiliária.                                                                                                      |      14      |   1    |   100%   |
+|     8    |    Alta    | Como cliente, gostaria de receber uma localização aproximada do endereço do imóvel. | 14 | 1 | 100% |
 
 ## 🏅 DoR - Definition of Ready <a id="dor"></a>
 
