@@ -40,16 +40,16 @@ A solução consiste em um **chatbot para o Telegram integrado com uma Inteligê
 </div>
 
 | Ranking | Prioridade | User Story | Esforço (SP) | Sprint | Status |
-| :-----: | :--------: | :--- | :----------: | :----: | :----: |
-| 1 | Alta | Como comprador, gostaria de encontrar com facilidade os imóveis disponíveis do banco de dados com uma busca básica, para ter mais facilidade ao encontrar um imóvel de acordo com meus parâmetros. | 20 | 1 | 0% |
-| 2 | Baixa | Como comprador, gostaria de ter prévias apresentações do imóvel para escolher um que esteja de acordo com as necessidades diárias como pontos de interesse próximos. | 36 | 3 | 0% |
-| 3 | Baixa | Como vendedor, gostaria de saber quais são os requisitos mais procurados pelos compradores no último mês ou semana (utilizando um contador de especificidades). | 60 | 3 | 0% |
-| 4 | Alta | Como vendedor ou comprador, gostaria de ter acesso a notícias recentes relacionadas à pesquisa no banco de dados para especulação imobiliária (saúde pública, pragas, criminalidade, infraestrutura, etc). | 14 | 1 | 0% |
-| 5 | Baixa | Como Comprador ou Vendedor, gostaria de um ID de usuário, para que minhas buscas sejam salvas e eu consiga continuar as minhas pesquisas. | 60 | 3 | 0% |
-| 6 | Média | Como comprador, gostaria de me comunicar com o chatbot por áudio para ser acessível para um maior número de pessoas. | 30 | 2 | 0% |
-| 7 | Média | Como vendedor, gostaria de ser informado quando a ia não tiver as informações necessárias para que eu possa acrescentar no banco de dados. (ex: piscina no imóvel, quadra, condomínio, etc) | 20 | 2 | 0% |
-| 8 | Alta  | Como cliente, gostaria de receber uma localização aproximada do endereço do imóvel. | 14 | 1 | 0% |
-| 9 | Baixa | Como cliente, gostaria de ser reconhecido se sou comprador ou vendedor para ter recomendações que melhor atendam minhas necessidades. | 14 | 3 | 0% |
+| :-----: | :--------: | :---: | :----------: | :----: | :----: |
+| 1 | Alta | Como comprador, gostaria de encontrar com facilidade os imóveis disponíveis do banco de dados com uma busca básica, para ter mais facilidade ao encontrar um imóvel de acordo com meus parâmetros. | 20 | 1 | 100% |
+| 2 | Alta | Como comprador, gostaria de ter uma mini apresentação do imóvel, com as características dele, fotos e link da imobiliária. | 14 | 1 | 100% |
+| 3 | Alta | Como cliente, gostaria de receber uma localização aproximada do endereço do imóvel. | 14 | 1 | 100% |
+| 4 | Média | Como vendedor, gostaria de saber quais são os requisitos mais procurados pelos compradores no último mês ou semana (utilizando um contador de especificidades). | 60 | 2 | 0% |
+| 5 | Média | Como vendedor ou comprador, gostaria de ter acesso a notícias recentes relacionadas à pesquisa no banco de dados para especulação imobiliária (saúde pública, pragas, criminalidade, infraestrutura, etc).  | 36 | 2 | 0% |
+| 6 | Média | Como comprador, gostaria de me comunicar com o chatbot por áudio para ser acessível para um maior número de pessoas. | 65 | 2 | 0% |
+| 7 | Baixa | Como Comprador ou Vendedor, gostaria de um ID de usuário, para que minhas buscas sejam salvas e eu consiga continuar as minhas pesquisas. | 60 | 3 | 0% |
+| 8 | Baixa | Como vendedor, gostaria de ser informado quando a ia não tiver as informações necessárias para que eu possa acrescentar no banco de dados. (ex: piscina no imóvel, quadra, condomínio, etc) | 36 | 3 | 0% |
+| 9 | Baixa | Como cliente, gostaria de ser reconhecido se sou comprador ou vendedor para ter recomendações que melhor atendam  minhas necessidades. | 45 | 3 | 0% |
 
 
 <div align="center">
@@ -88,11 +88,11 @@ A solução consiste em um **chatbot para o Telegram integrado com uma Inteligê
   
 ## Cronograma de Sprints <a id="sprint"></a>
 
-| Sprint | Período | Documentação |
-| :---------: | :------------: | :-----------------------------------------: |
-| 📌 SPRINT 1 | 07/09 - 27/09 | [Sprint 1 Docs](./Docs/Sprints/Sprint-1.md) |
-| 📌 SPRINT 2 | 05/10 - 25/10 | [Sprint 2 Docs](./Docs/Sprints/Sprint-2.md) |
-| 📌 SPRINT 3 | 02/11 - 22/11 | [Sprint 3 Docs](./Docs/Sprints/Sprint-3.md) |
+| Sprint | Período | Documentação | Link do Vídeo |
+| :---------: | :------------: | :---: | :---: |
+| 📌 SPRINT 1 | 07/09 - 27/09 | [Sprint 1 Docs](./Docs/Sprints/Sprint-1.md) | [Vídeo no Youtube](https://youtu.be/Ei-zJ9vX5ko)|
+| 📌 SPRINT 2 | 05/10 - 25/10 | [Sprint 2 Docs](./Docs/Sprints/Sprint-2.md) | - |
+| 📌 SPRINT 3 | 02/11 - 22/11 | [Sprint 3 Docs](./Docs/Sprints/Sprint-3.md) | - |
 
 </div>
 
@@ -122,15 +122,15 @@ A solução consiste em um **chatbot para o Telegram integrado com uma Inteligê
  🛠 Pré-requisitos
 
 - Acesso a internet
-
+- Baixar o aplicativo Telegram
   
 <div align="center">
   
- ## Como Executar o Projeto (Em Breve)
+ ## Como Executar o Projeto
 
 </div>
 
-- Instruções de instalação e execução serão adicionadas conforme o desenvolvimento do ambiente.
+- Começar uma conversa com o [Bot Imobiliário](https://t.me/Cami_fatecbot)
 
 <div align="center">
   

@@ -28,8 +28,8 @@
 | Ranking | Prioridade | User Story | Story Points | Sprint | Status |
 | :------: | :--------: | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :----------: | :----: | :----: |
 |     1    |    Alta    | Como comprador, gostaria de encontrar com facilidade os imóveis disponíveis do banco de dados com uma busca básica, para ter mais facilidade ao encontrar um imóvel de acordo com meus parâmetros.             |      20      |   1    |   100%   |
-|     4    |    Alta    | Como comprador, gostaria de ter uma mini apresentação do imóvel, com as características dele, fotos e link da imobiliária.                                                                                                      |      14      |   1    |   100%   |
-|     8    |    Alta    | Como cliente, gostaria de receber uma localização aproximada do endereço do imóvel. | 14 | 1 | 100% |
+|     2   |    Alta    | Como comprador, gostaria de ter uma mini apresentação do imóvel, com as características dele, fotos e link da imobiliária.                                                                                                      |      14      |   1    |   100%   |
+|     3    |    Alta    | Como cliente, gostaria de receber uma localização aproximada do endereço do imóvel. | 14 | 1 | 100% |
 
 ## 🏅 DoR - Definition of Ready <a id="dor"></a>
 
