@@ -41,12 +41,12 @@ A solução consiste em um **chatbot para o Telegram integrado com uma Inteligê
 
 | Ranking | Prioridade | User Story | Esforço (SP) | Sprint | Status |
 | :-----: | :--------: | :---: | :----------: | :----: | :----: |
-| 1 | Alta | Como comprador, gostaria de encontrar com facilidade os imóveis disponíveis do banco de dados com uma busca básica, para ter mais facilidade ao encontrar um imóvel de acordo com meus parâmetros. | 20 | 1 | 100% |
+| 1 | Alta | Como comprador, gostaria de encontrar com facilidade os imóveis disponíveis na base de dados com uma busca básica, para ter mais facilidade ao encontrar um imóvel de acordo com meus parâmetros. | 20 | 1 | 100% |
 | 2 | Alta | Como comprador, gostaria de ter uma mini apresentação do imóvel, com as características dele, fotos e link da imobiliária. | 14 | 1 | 100% |
 | 3 | Alta | Como cliente, gostaria de receber uma localização aproximada do endereço do imóvel. | 14 | 1 | 100% |
-| 4 | Média | Como vendedor, gostaria de saber quais são os requisitos mais procurados pelos compradores no último mês ou semana (utilizando um contador de especificidades). | 60 | 2 | 0% |
-| 5 | Média | Como vendedor ou comprador, gostaria de ter acesso a notícias recentes relacionadas à pesquisa no banco de dados para especulação imobiliária (saúde pública, pragas, criminalidade, infraestrutura, etc).  | 36 | 2 | 0% |
-| 6 | Média | Como comprador, gostaria de me comunicar com o chatbot por áudio para ser acessível para um maior número de pessoas. | 65 | 2 | 0% |
+| 4 | Média | Como comprador, gostaria de me comunicar com o chatbot por áudio para ser acessível para um maior número de pessoas. | 40 | 2 | 0% |
+| 5 | Média | Como cliente, gostaria de saber quais são os requisitos mais procurados com base no histórico de pesquisas para saber as tendências do mercado atual. | 40 | 2 | 0% |
+| 6 | Média | Como cliente, gostaria de ter acesso a notícias positivas recentes relacionadas à região do imóvel para ter mais argumentos de venda. | 20 | 2 | 0% |
 | 7 | Baixa | Como Comprador ou Vendedor, gostaria de um ID de usuário, para que minhas buscas sejam salvas e eu consiga continuar as minhas pesquisas. | 60 | 3 | 0% |
 | 8 | Baixa | Como vendedor, gostaria de ser informado quando a ia não tiver as informações necessárias para que eu possa acrescentar no banco de dados. (ex: piscina no imóvel, quadra, condomínio, etc) | 36 | 3 | 0% |
 | 9 | Baixa | Como cliente, gostaria de ser reconhecido se sou comprador ou vendedor para ter recomendações que melhor atendam  minhas necessidades. | 45 | 3 | 0% |
