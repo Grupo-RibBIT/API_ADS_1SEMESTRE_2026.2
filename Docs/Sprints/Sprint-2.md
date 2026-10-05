@@ -21,14 +21,15 @@
 
 ## 🏅 Desafio <a id="desafio"></a>
 
-**Refinar a experiência e acessibilidade do usuário no Chatbot através de comandos de voz e segmentação de perfis.** O objetivo principal desta entrega é evoluir a maturidade do bot, permitindo interações mais inclusivas (comunicação por áudio), a separação clara de fluxos de jornada para compradores e vendedores.
+**Refinar a experiência e acessibilidade do usuário no Chatbot através de comandos de voz, mostrar imóveis mais acessados e informações dos arredores dos Imóveis.** O objetivo principal desta entrega é evoluir a maturidade do Bot, permitindo interações mais inclusivas (comunicação por áudio). Além disso, a possibilidade do cliente ver quais fatores tiveram maior relevância nas pesquisas, junto com informações dos arredores dos imóveis.
 
 ## 📋 User Stories <a id="us"></a>
 
 | Ranking | Prioridade | User Story | Story Points | Sprint | Status |
 | :------: | :--------: | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :----------: | :----: | :----: |
-| 6 | Média | Como comprador, gostaria de me comunicar com o chatbot por áudio para ser acessível para um maior número de pessoas. | 30 | 2 | 0% |
-| 7 | Média | Como vendedor, gostaria de ser informado quando a ia não tiver as informações necessárias para que eu possa acrescentar no banco de dados. (ex: piscina no imóvel, quadra, condomínio, etc) | 20 | 2 | 0% |
+| 4 | Alta | Como comprador, gostaria de me comunicar com o chatbot por áudio para ser acessível para um maior número de pessoas. | 40 | 2 | 0% |
+| 5 | Média | Como cliente, gostaria de saber quais são os requisitos mais procurados com base no histórico de pesquisas para saber as tendências do mercado atual. | 40 | 2 | 0% |
+| 6 | Média | Como cliente, gostaria de ter acesso a notícias positivas recentes relacionadas à região do imóvel para ter mais argumentos de venda. | 20 | 2 | 0% |
 
 ## 🏅 DoR - Definition of Ready <a id="dor"></a>
 
