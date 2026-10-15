@@ -4,7 +4,6 @@ import telebot
 import random
 import re  # Biblioteca de Expressões Regulares (usada para extrair números de textos)
 import pandas as pd  # Biblioteca para manipulação de dados e leitura do arquivo CSV
-import time
 from typing import Literal
 
 from geopy.geocoders import Nominatim
@@ -12,7 +11,7 @@ geolocator = Nominatim(user_agent="Bottelegram")
 
 #Configuração do Bot/Telegram e do LLM
 
-API_TOKEN = 'YOUR_TOKEN_HERE'
+API_TOKEN = '8972674446:AAG7cmVU3EvTattmRpx8gBq2iwAUeGPhqhw'
 bot = telebot.TeleBot(API_TOKEN)
 
 lm = dspy.LM('ollama_chat/qwen2.5-coder:7b', api_base='http://localhost:11434', api_key='ignored')
@@ -22,7 +21,7 @@ dspy.configure(lm=lm)
 
 list_fotos_apt = ["kamen-nikolov-fin","maxim-dorokhov","valmik-shah"]
 
-path_csv = "/home/jbj/Área de trabalho/aula_jean/API_ADS_1SEMESTRE_2026.2/Sprint_1/apartamentos_sp_estruturado.csv"
+path_csv = "C:/Users/usout/Downloads/apartamentos_sp_estruturado.csv"
 
 TiposFiltro = Literal["preço_num","Área","Endereço","Quartos","Banheiros","Vagas_de_estacionamento"]
 
@@ -95,19 +94,19 @@ class EscolhasGerenciador(dspy.Signature):
   precisa_de_busca_no_csv:bool = dspy.OutputField(desc="Define se o cliente mencionou/pediu um imóvel, uma rua, um bairro, ou uma informação sobre um imóvel, que precisará ser buscada no csv")
 
 
+class FiltrosDoCSV(dspy.Signature):
+  '''Acha apartamentos que se encaixam no requisitos do cliente dentro do csv'''
+  df_bruto = dspy.InputField(desc="Dataframe completo dos apartamentos")
+  tipos_de_filtro: list[TiposFiltro] = dspy.InputField(desc="Lista com os tipos de filtragem/colunas do CSV, sendo 'Área' a área útil construída do apartamento")
+  valor_desejado: dict[TiposFiltro,list] = dspy.InputField(desc="Valores desejados do cliente, se tiver mais de uma variável é um intervalo que engloba esses valores. Se tiver apenas um valor, é um intervalo de 0 até o valor pedido.")
+  lista_apartamentos_str:list = dspy.OutputField(desc="Lista dos apartamentos achados pelo filtro em formato de sting")
+
+
 class ExtrairFiltros(dspy.Signature):
   """Extrai filtros de busca de imóveis a partir do pedido do usuário."""
   texto_usuario: str = dspy.InputField()
   tipos_de_filtro: list[TiposFiltro] = dspy.OutputField(desc="Lista com os tipos de filtragem/colunas do CSV,sendo 'Área' a área últil construida do apartamento")
-  valor_desejado: dict[TiposFiltro,list] = dspy.OutputField(desc="Valores desejados do cliente, se tiver um só valor, a lista vai conter só uma variavel e se tiver mais de uma variável é um intevalo que engloba esses valores")
-
-
-class FiltrosDoCSV(dspy.Signature):
-  '''Acha apartamentos que se encaixam no requisitos do cliente dentro do csv'''
-  df_bruto = dspy.InputField(desc="Dataframe completo dos apartamentos")
-  tipos_de_filtro: list[TiposFiltro] = dspy.InputField(desc="Lista com os tipos de filtragem/colunas do CSV,sendo 'Área' a área últil construida do apartamento")
-  valor_desejado: dict[TiposFiltro,list] = dspy.InputField(desc="Valores desejados do cliente, se tiver mais de uma variável é um intevalo que engloba esses valores")
-  lista_apartamentos_str:list = dspy.OutputField(desc="Lista dos apartamentos achados pelo filtro em formato de sting")
+  valor_desejado: dict[TiposFiltro,list] = dspy.OutputField(desc="Valores desejados do cliente, se tiver apenas um valor, é um intervalo de 0 até o valor pedido. Se tiver mais de uma variável é um intevalo que engloba esses valores")
 
 
 #Lista de feramentas/funções para serem usadas pelos sub-modulos
@@ -190,7 +189,6 @@ def enviar_localizacao_no_telegram(endereço_apartamento, chat_id_telegram):
       print('Longitude: ', endereco.longitude)
   else:
       return 'Endereço nao encontrado, encerre a pesquisa e peça para o usuario colocar um endereço válido' 
-  
   return send_coords()
 
 
@@ -219,7 +217,7 @@ def filtrar_csv(tipo_de_filtragem,df_bruto,valores_desejados:dict[TiposFiltro,li
           .astype(str)
           .str.contains(valores_desejado_atual[0], case=False, na=False)
       ]
-    else:
+    if tipo == "preço_num":
       if len(valores_desejado_atual) >= 2:
           v_min, v_max = min(valores_desejado_atual[0], valores_desejado_atual[1]), max(
               valores_desejado_atual[0], valores_desejado_atual[1]
@@ -228,12 +226,22 @@ def filtrar_csv(tipo_de_filtragem,df_bruto,valores_desejados:dict[TiposFiltro,li
               (df[tipo] >= v_min) & (df[tipo] <= v_max)
           ]
       else:
-          df = df[df[tipo] <= valores_desejado_atual[0]]
-  
-  if not df.empty:
-    print(f"[Filtro CSV] {df.shape[0]} imóveis retornados.")
-  else:
-    print("[Filtro CSV] Nenhum imóvel encontrado para estes critérios.")
+          v_min, v_max = 0, max(
+              valores_desejado_atual
+          )
+          df = df[
+              (df[tipo] >= v_min) & (df[tipo] <= v_max)
+          ]
+    else:
+      if len(valores_desejado_atual) >= 2:
+                v_min, v_max = min(valores_desejado_atual[0], valores_desejado_atual[1]), max(
+                    valores_desejado_atual[0], valores_desejado_atual[1]
+                )
+                df = df[
+                    (df[tipo] >= v_min) & (df[tipo] <= v_max)
+                ]
+      else:
+          df = df[df[tipo] == valores_desejado_atual[0]]
 
   return df
 
@@ -264,29 +272,23 @@ class BotImobiliária(dspy.Module):
 
     self.extrator = dspy.ChainOfThought(ExtrairFiltros)
     
-    self.filtrador = dspy.ReAct(FiltrosDoCSV, tools=[filtrar_csv,transformar_dataframe_para_string])
+    self.filtrador = dspy.ReAct(FiltrosDoCSV, tools=[filtrar_csv])
 
     self.arquiteto = dspy.ChainOfThought(DescriçãoApartamento)
 
     self.apresentador = dspy.ReAct(CaracterísticasApresentação, tools=[montar_mini_apresentação_e_mandar_pelo_telegram])
 
-    self.navegador = dspy.ReAct("endereço_apartamento, chat_id_telegram -> localização", tools=[enviar_localizacao_no_telegram], max_iters=3)
+    self.navegador = dspy.ReAct("endereço_apartamento, chat_id_telegram -> localização", tools=[enviar_localizacao_no_telegram], max_iters=1)
 
     self.finalizador = dspy.ReAct("resultado_do_pensamento -> resposta_final_cliente",tools=[])
 
   #A função foward diz como o modulo geral vai funcionar
 
   def forward(self, mensagem) -> dspy.Prediction:
-    inicio = time.time()
+   
     resposta_inicial = self.atendente(mensagem_do_cliente=mensagem.text,chat_id_telegram=mensagem.chat.id)
-    fim = time.time()
-    print(f"Resposta Atendente obtida em {fim - inicio:.2f} segundos")
-    print(resposta_inicial)
 
-    inicio = time.time()
     escopo_do_pedido = self.gerenciador(analisar_escopo = resposta_inicial.desejo_do_cliente, lista_de_ferramentas=ferramentas_dos_modulos)
-    fim = time.time()
-    print(f"Escopo obtido em {fim - inicio:.2f} segundos")
     print('Escopo Pedido:', escopo_do_pedido)
 
     linha_de_pensamento = f'''
@@ -298,56 +300,43 @@ class BotImobiliária(dspy.Module):
           '''
 
     if escopo_do_pedido.precisa_de_busca_no_csv == True:
-        inicio = time.time()
         filtros_de_pesquisa = self.extrator(texto_usuario=mensagem.text)
-        fim = time.time()
-        print(f"Filtros obtidos em {fim - inicio:.2f} segundos")
         print(filtros_de_pesquisa)
-
-        inicio = time.time()
         apartamentos_achados = filtrar_csv(tipo_de_filtragem=filtros_de_pesquisa.tipos_de_filtro,valores_desejados=filtros_de_pesquisa.valor_desejado,df_bruto=self.dataframe)
-        fim = time.time()
-        print(f"Apartamentos obtidos em {fim - inicio:.2f} segundos")
         print(apartamentos_achados)
+        #for linha_achada in apartamentos_achados:
+        #  caracteristicas = self.arquiteto(linha_do_csv=linha_achada)
+        #  print(caracteristicas)
+        #  linha_de_pensamento += f'''
+          ##Caracterísca encontradas
+        #          {caracteristicas}'''
 
-        linhas = transformar_dataframe_para_string(apartamentos_achados)
-        for n_linha in range(len(linhas)):
-          if n_linha > 4:
-            break
-          linha_achada = linhas[n_linha]
-          caracteristicas = self.arquiteto(linha_do_csv=linha_achada)
-          print(caracteristicas)
-          linha_de_pensamento += f'''
-                #Caracterísca encontradas
-                 {caracteristicas}
+    # if escopo_do_pedido.precisa_de_apresentacao or escopo_do_pedido.precisa_de_localizacao:
+    #     foto_escolhida = random.randint(0,2)
+    #     slides = list_fotos_apt[foto_escolhida]
+    #     apresentação = self.apresentador(
+    #       fotos = slides, 
+    #       banheiros = caracteristicas.banheiros, 
+    #       quartos = caracteristicas.quartos, 
+    #       área = caracteristicas.área, 
+    #       valor = caracteristicas.valor, 
+    #       estacionamento = caracteristicas.estacionamento, 
+    #       chat_id_telegram = mensagem.chat.id)
+    #     linha_de_pensamento += f'''
+    #     ## Apresentação
+    #     {apresentação}
 
-                  '''
-          if escopo_do_pedido.precisa_de_apresentacao or escopo_do_pedido.precisa_de_localizacao:
-            foto_escolhida = random.randint(0,2)
-            slides = list_fotos_apt[foto_escolhida]
-            apresentação = self.apresentador(
-              fotos = slides, 
-              banheiros = caracteristicas.banheiros, 
-              quartos = caracteristicas.quartos, 
-              área = caracteristicas.área, 
-              valor = caracteristicas.valor, 
-              estacionamento = caracteristicas.estacionamento, 
-              chat_id_telegram = mensagem.chat.id)
-            linha_de_pensamento += f'''
-            ## Apresentação
-            {apresentação}
-
-              '''
+    #       '''
+    
+    #     coordenadas = self.navegador(endereço_apartamento=caracteristicas.endereço_apartamento, chat_id_telegram=mensagem.chat.id)
+    #     print(coordenadas)
+    #     linha_de_pensamento += f'''
+    #             ## Coordenadas
+    #             {coordenadas}
         
-            coordenadas = self.navegador(endereço_apartamento=caracteristicas.endereço_apartamento, chat_id_telegram=mensagem.chat.id)
-            print(coordenadas)
-            linha_de_pensamento += f'''
-                    ## Coordenadas
-                    {coordenadas}
-            
-                      '''
+    #               '''
 
-    print(linha_de_pensamento)
+    # print(linha_de_pensamento)
 
     final = self.finalizador(resultado_do_pensamento=linha_de_pensamento).resposta_final_cliente
 
