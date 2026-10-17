@@ -12,7 +12,7 @@ geolocator = Nominatim(user_agent="Bottelegram")
 
 #Configuração do Bot/Telegram e do LLM
 
-API_TOKEN = '8628398211:AAHaP3hUizrYap7uJ2HUoJk_R1rfKanzhzw'
+API_TOKEN = 'YOUR_TOKEN_HERE'
 bot = telebot.TeleBot(API_TOKEN)
 
 lm = dspy.LM('ollama_chat/qwen2.5-coder:7b', api_base='http://localhost:11434', api_key='ignored')
