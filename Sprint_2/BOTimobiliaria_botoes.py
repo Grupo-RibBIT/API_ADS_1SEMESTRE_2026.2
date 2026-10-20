@@ -22,7 +22,7 @@ dspy.configure(lm=lm)
 
 list_fotos_apt = ["kamen-nikolov-fin","maxim-dorokhov","valmik-shah"]
 
-path_csv = r"C:\Users\Wilian Mancilha\Documents\Programação Faculdade\FATEC\apartamentos_sp_estruturado.csv"
+path_csv = r"PATH TO CSV"
 
 TiposFiltro = Literal["preço_num","Área","Endereço","Quartos","Banheiros","Vagas_de_estacionamento"]
 

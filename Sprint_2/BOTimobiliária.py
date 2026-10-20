@@ -4,31 +4,30 @@ import telebot
 import random
 import re  # Biblioteca de Expressões Regulares (usada para extrair números de textos)
 import pandas as pd  # Biblioteca para manipulação de dados e leitura do arquivo CSV
+import time
 from typing import Literal
 
 from geopy.geocoders import Nominatim
-geolocator = Nominatim(user_agent="Bottelegram")
 
 #Configuração do Bot/Telegram e do LLM
 
-API_TOKEN = '8972674446:AAG7cmVU3EvTattmRpx8gBq2iwAUeGPhqhw'
+API_TOKEN = 'YOUR_tOKEN'
 bot = telebot.TeleBot(API_TOKEN)
 
 lm = dspy.LM('ollama_chat/qwen2.5-coder:7b', api_base='http://localhost:11434', api_key='ignored')
 dspy.configure(lm=lm)
 
+geolocator = Nominatim(user_agent="Bottelegram")
+
 #Dados externos
 
 list_fotos_apt = ["kamen-nikolov-fin","maxim-dorokhov","valmik-shah"]
 
-path_csv = "C:/Users/usout/Downloads/apartamentos_sp_estruturado.csv"
+path_csv = "PATH DO CSV"
 
 TiposFiltro = Literal["preço_num","Área","Endereço","Quartos","Banheiros","Vagas_de_estacionamento"]
 
-mini_csv ='''
-created_date,Preço,below_price,Área,Endereço,Quartos,Banheiros,Vagas_de_estacionamento,extract_date
-2018-05-24T15:02:18Z,R$ 2.000.000,FALSO,62,"Alameda Casa Branca 909, Jardim Paulista - São Paulo/SP",1,1,1,2024-11-22
-'''
+está_rodando = False
 
 #Fazendo o dataframe do panda
 def transforma_csv_em_dataFrame(caminho_csv):
@@ -86,12 +85,25 @@ class EscolhasAtendente(dspy.Signature):
 
 
 class EscolhasGerenciador(dspy.Signature):
-  '''Analisa o desejo_do_cliente extraído pelo Atendente e classifica com Bool (True ou False) se a mensagem possui as palavras apresentação e/ou localização e/ou um imóvel'''
+  '''Analisa o desejo_do_cliente extraído pelo Atendente e classifica com Bool (True ou False) se a mensagem possui as palavras apresentação e/ou localização e/ou um imóvel
+  REGRAS:
+    - Se o cliente "QUER UM APARTAMENTO" ele deseja também uma apresentação
+  '''
   analisar_escopo:str = dspy.InputField()
   lista_de_ferramentas:list = dspy.InputField(desc="Lista de ferramentas usadas pelos sub-modulos")
   precisa_de_localizacao:bool = dspy.OutputField(desc="Define se o cliente mencionou/pediu localização de um imóvel, que precisará ser enviada")
   precisa_de_apresentacao:bool = dspy.OutputField(desc="Define se o cliente mencionou/pediu a apresentação ou mini-apresentação de um imóvel, que precisará ser enviada")
   precisa_de_busca_no_csv:bool = dspy.OutputField(desc="Define se o cliente mencionou/pediu um imóvel, uma rua, um bairro, ou uma informação sobre um imóvel, que precisará ser buscada no csv")
+
+class ExtrairFiltros(dspy.Signature):
+  """Extrai filtros de busca de imóveis a partir do pedido do usuário.
+  
+    REGRAS:
+      - Não usar variáveis None
+  """
+  texto_usuario: str = dspy.InputField()
+  tipos_de_filtro: list[TiposFiltro] = dspy.OutputField(desc="Lista com os tipos de filtragem/colunas do CSV,sendo 'Área' a área últil construida do apartamento")
+  valor_desejado: dict[TiposFiltro,list] = dspy.OutputField(desc="Valores desejados do cliente, se tiver apenas um valor, é um intervalo de 0 até o valor pedido. Se tiver mais de uma variável é um intervalo que engloba esses valores")
 
 
 class FiltrosDoCSV(dspy.Signature):
@@ -100,14 +112,6 @@ class FiltrosDoCSV(dspy.Signature):
   tipos_de_filtro: list[TiposFiltro] = dspy.InputField(desc="Lista com os tipos de filtragem/colunas do CSV, sendo 'Área' a área útil construída do apartamento")
   valor_desejado: dict[TiposFiltro,list] = dspy.InputField(desc="Valores desejados do cliente, se tiver mais de uma variável é um intervalo que engloba esses valores. Se tiver apenas um valor, é um intervalo de 0 até o valor pedido.")
   lista_apartamentos_str:list = dspy.OutputField(desc="Lista dos apartamentos achados pelo filtro em formato de sting")
-
-
-class ExtrairFiltros(dspy.Signature):
-  """Extrai filtros de busca de imóveis a partir do pedido do usuário."""
-  texto_usuario: str = dspy.InputField()
-  tipos_de_filtro: list[TiposFiltro] = dspy.OutputField(desc="Lista com os tipos de filtragem/colunas do CSV,sendo 'Área' a área últil construida do apartamento")
-  valor_desejado: dict[TiposFiltro,list] = dspy.OutputField(desc="Valores desejados do cliente, se tiver apenas um valor, é um intervalo de 0 até o valor pedido. Se tiver mais de uma variável é um intevalo que engloba esses valores")
-
 
 #Lista de feramentas/funções para serem usadas pelos sub-modulos
 
@@ -151,7 +155,7 @@ def montar_mini_apresentação_e_mandar_pelo_telegram(
 
   </tg-slidehow>
 
-  #Apartamento ID563595
+  #Apartamento ID563595precisa_de_localizacao=False
   ######Valor de Compra: ==R${valor}==
 
   | Infos do Apartamento | |
@@ -166,7 +170,6 @@ def montar_mini_apresentação_e_mandar_pelo_telegram(
   >**Para mais informações**: [Site da Imobiliária](https://github.com/Grupo-RibBIT)
   '''
 
-  print(modelo_layout)
   apresentação = telebot.types.InputRichMessage(markdown=modelo_layout)
 
   bot.send_rich_message(chat_id_telegram,apresentação)
@@ -217,7 +220,7 @@ def filtrar_csv(tipo_de_filtragem,df_bruto,valores_desejados:dict[TiposFiltro,li
           .astype(str)
           .str.contains(valores_desejado_atual[0], case=False, na=False)
       ]
-    if tipo == "preço_num":
+    elif tipo == "preço_num":
       if len(valores_desejado_atual) >= 2:
           v_min, v_max = min(valores_desejado_atual[0], valores_desejado_atual[1]), max(
               valores_desejado_atual[0], valores_desejado_atual[1]
@@ -242,6 +245,11 @@ def filtrar_csv(tipo_de_filtragem,df_bruto,valores_desejados:dict[TiposFiltro,li
                 ]
       else:
           df = df[df[tipo] == valores_desejado_atual[0]]
+
+  if not df.empty:
+    print(f"[Filtro CSV] {df.shape[0]} imóveis retornados.")
+  else:
+    print("[Filtro CSV] Nenhum imóvel encontrado para estes critérios.")
 
   return df
 
@@ -271,8 +279,6 @@ class BotImobiliária(dspy.Module):
     self.atendente = dspy.ChainOfThought(EscolhasAtendente)
 
     self.extrator = dspy.ChainOfThought(ExtrairFiltros)
-    
-    self.filtrador = dspy.ReAct(FiltrosDoCSV, tools=[filtrar_csv])
 
     self.arquiteto = dspy.ChainOfThought(DescriçãoApartamento)
 
@@ -285,10 +291,19 @@ class BotImobiliária(dspy.Module):
   #A função foward diz como o modulo geral vai funcionar
 
   def forward(self, mensagem) -> dspy.Prediction:
-   
-    resposta_inicial = self.atendente(mensagem_do_cliente=mensagem.text,chat_id_telegram=mensagem.chat.id)
+    global está_rodando
+    está_rodando = True
 
+    inicio = time.time()
+    resposta_inicial = self.atendente(mensagem_do_cliente=mensagem.text,chat_id_telegram=mensagem.chat.id)
+    fim = time.time()
+    print(f"Resposta Atendente obtida em {fim - inicio:.2f} segundos")
+    print(resposta_inicial)
+
+    inicio = time.time()
     escopo_do_pedido = self.gerenciador(analisar_escopo = resposta_inicial.desejo_do_cliente, lista_de_ferramentas=ferramentas_dos_modulos)
+    fim = time.time()
+    print(f"Escopo obtido em {fim - inicio:.2f} segundos")
     print('Escopo Pedido:', escopo_do_pedido)
 
     linha_de_pensamento = f'''
@@ -300,46 +315,83 @@ class BotImobiliária(dspy.Module):
           '''
 
     if escopo_do_pedido.precisa_de_busca_no_csv == True:
+        inicio = time.time()
         filtros_de_pesquisa = self.extrator(texto_usuario=mensagem.text)
+        fim = time.time()
+        print(f"Filtros obtidos em {fim - inicio:.2f} segundos")
         print(filtros_de_pesquisa)
+
+        todos_os_filtros = ["preço_num","Área","Endereço","Quartos","Banheiros","Vagas_de_estacionamento"]
+        filtros_não_usados = [filtro for filtro in todos_os_filtros if filtro not in filtros_de_pesquisa.tipos_de_filtro]
+        print("Filtros que não foram usados: ", filtros_não_usados) 
+
+        inicio = time.time()
         apartamentos_achados = filtrar_csv(tipo_de_filtragem=filtros_de_pesquisa.tipos_de_filtro,valores_desejados=filtros_de_pesquisa.valor_desejado,df_bruto=self.dataframe)
+        fim = time.time()
+        print(f"Apartamentos obtidos em {fim - inicio:.2f} segundos")
         print(apartamentos_achados)
-        #for linha_achada in apartamentos_achados:
-        #  caracteristicas = self.arquiteto(linha_do_csv=linha_achada)
-        #  print(caracteristicas)
-        #  linha_de_pensamento += f'''
-          ##Caracterísca encontradas
-        #          {caracteristicas}'''
 
-    # if escopo_do_pedido.precisa_de_apresentacao or escopo_do_pedido.precisa_de_localizacao:
-    #     foto_escolhida = random.randint(0,2)
-    #     slides = list_fotos_apt[foto_escolhida]
-    #     apresentação = self.apresentador(
-    #       fotos = slides, 
-    #       banheiros = caracteristicas.banheiros, 
-    #       quartos = caracteristicas.quartos, 
-    #       área = caracteristicas.área, 
-    #       valor = caracteristicas.valor, 
-    #       estacionamento = caracteristicas.estacionamento, 
-    #       chat_id_telegram = mensagem.chat.id)
-    #     linha_de_pensamento += f'''
-    #     ## Apresentação
-    #     {apresentação}
+        print(f"Foram achados {apartamentos_achados.shape[0]} apartamentos com essa busca")
+        if apartamentos_achados.shape[0] > 30:
+          bot.send_message(mensagem.chat.id,f"Foram encontrados muitos ({apartamentos_achados.shape[0]}) apartamentos com as características que você procura, precisamos de informações extras para sermos mais precisos!")
+          bot.send_message(mensagem.chat.id,f"Você tem preferência sobre {", ".join(filtros_não_usados)}?")
+          return
 
-    #       '''
-    
-    #     coordenadas = self.navegador(endereço_apartamento=caracteristicas.endereço_apartamento, chat_id_telegram=mensagem.chat.id)
-    #     print(coordenadas)
-    #     linha_de_pensamento += f'''
-    #             ## Coordenadas
-    #             {coordenadas}
-        
-    #               '''
+        linhas = transformar_dataframe_para_string(apartamentos_achados)
+        for n_linha in range(len(linhas)):
+          if n_linha > 4:
+            break
+          linha_achada = linhas[n_linha]
+          inicio = time.time()
+          caracteristicas = self.arquiteto(linha_do_csv=linha_achada)
+          fim = time.time()
+          print(f"Apartamentos obtidos em {fim - inicio:.2f} segundos")
+          print(caracteristicas)
 
-    # print(linha_de_pensamento)
+          linha_de_pensamento += f'''
+                #Caracterísca encontradas
+                 {caracteristicas}
+
+                  '''
+          
+          if escopo_do_pedido.precisa_de_apresentacao or escopo_do_pedido.precisa_de_localizacao:
+            inicio = time.time()
+            foto_escolhida = random.randint(0,2)
+            slides = list_fotos_apt[foto_escolhida]
+            apresentação = self.apresentador(
+              fotos = slides, 
+              banheiros = caracteristicas.banheiros, 
+              quartos = caracteristicas.quartos, 
+              área = caracteristicas.área, 
+              valor = caracteristicas.valor, 
+              estacionamento = caracteristicas.estacionamento, 
+              chat_id_telegram = mensagem.chat.id)
+            fim = time.time()
+            print(f"Apartamentos obtidos em {fim - inicio:.2f} segundos")
+            
+            linha_de_pensamento += f'''
+            ## Apresentação
+            {apresentação}
+
+              '''
+            
+            inicio = time.time()
+            coordenadas = self.navegador(endereço_apartamento=caracteristicas.endereço_apartamento, chat_id_telegram=mensagem.chat.id)
+            fim = time.time()
+            print(f"Apartamentos obtidos em {fim - inicio:.2f} segundos")
+            print(coordenadas)
+
+            linha_de_pensamento += f'''
+                    ## Coordenadas
+                    {coordenadas}
+            
+                      '''
+
+    print(linha_de_pensamento)
 
     final = self.finalizador(resultado_do_pensamento=linha_de_pensamento).resposta_final_cliente
-
+    
+    está_rodando = False
     return dspy.Prediction(final)
 
 #Criando uma instância do modulo geral
@@ -350,7 +402,16 @@ def reply_hi(message):
   bot.send_message_draft(message.chat.id,20,'')
   print("Mensagem recebida!")
 
-  #Usando a instância com a mensagem que o cliente mandar
-  resultado_interação = bot_recepção(mensagem=message)
+  if not está_rodando:
+    print("Inciando a o bot...")
+    historico_conversa.append(message.text)
+    #Usando a instância com a mensagem que o cliente mandar
+    resultado_interação = bot_recepção(mensagem=message)
+  else:
+    print("Reiniciando o bot...")
+    message.text = historico_conversa[-1] + ", e quero também com " + message.text
+    historico_conversa.append(message.text)
+    #Usando a instância com a mensagem que o cliente mandar
+    resultado_interação = bot_recepção(mensagem=message)
 
 bot.polling()

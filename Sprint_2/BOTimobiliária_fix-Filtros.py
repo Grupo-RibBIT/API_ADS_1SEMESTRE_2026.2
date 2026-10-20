@@ -11,7 +11,7 @@ geolocator = Nominatim(user_agent="Bottelegram")
 
 #Configuração do Bot/Telegram e do LLM
 
-API_TOKEN = '8972674446:AAG7cmVU3EvTattmRpx8gBq2iwAUeGPhqhw'
+API_TOKEN = 'YOUR_TOKEN'
 bot = telebot.TeleBot(API_TOKEN)
 
 lm = dspy.LM('ollama_chat/qwen2.5-coder:7b', api_base='http://localhost:11434', api_key='ignored')
@@ -21,7 +21,7 @@ dspy.configure(lm=lm)
 
 list_fotos_apt = ["kamen-nikolov-fin","maxim-dorokhov","valmik-shah"]
 
-path_csv = "C:/Users/usout/Downloads/apartamentos_sp_estruturado.csv"
+path_csv = "PATH TO CSV"
 
 TiposFiltro = Literal["preço_num","Área","Endereço","Quartos","Banheiros","Vagas_de_estacionamento"]
 
