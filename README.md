@@ -44,9 +44,9 @@ A solução consiste em um **chatbot para o Telegram integrado com uma Inteligê
 | 1 | Alta | Como comprador, gostaria de encontrar com facilidade os imóveis disponíveis na base de dados com uma busca básica, para ter mais facilidade ao encontrar um imóvel de acordo com meus parâmetros. | 20 | 1 | 100% |
 | 2 | Alta | Como comprador, gostaria de ter uma mini apresentação do imóvel, com as características dele, fotos e link da imobiliária. | 14 | 1 | 100% |
 | 3 | Alta | Como cliente, gostaria de receber uma localização aproximada do endereço do imóvel. | 14 | 1 | 100% |
-| 4 | Média | Como comprador, gostaria de me comunicar com o chatbot por áudio para ser acessível para um maior número de pessoas. | 40 | 2 | 0% |
-| 5 | Média | Como cliente, gostaria de saber quais são os requisitos mais procurados com base no histórico de pesquisas para saber as tendências do mercado atual. | 40 | 2 | 0% |
-| 6 | Média | Como cliente, gostaria de ter acesso a notícias positivas recentes relacionadas à região do imóvel para ter mais argumentos de venda. | 20 | 2 | 0% |
+| 4 | Média | Como comprador, gostaria de me comunicar com o chatbot por áudio para ser acessível para um maior número de pessoas. | 40 | 2 | 100% |
+| 5 | Média | Como cliente, gostaria de saber quais são os requisitos mais procurados com base no histórico de pesquisas para saber as tendências do mercado atual. | 40 | 2 | 100% |
+| 6 | Média | Como cliente, gostaria de ter acesso a notícias positivas recentes relacionadas à região do imóvel para ter mais argumentos de venda. | 20 | 2 | 100% |
 | 7 | Baixa | Como Comprador ou Vendedor, gostaria de um ID de usuário, para que minhas buscas sejam salvas e eu consiga continuar as minhas pesquisas. | 60 | 3 | 0% |
 | 8 | Baixa | Como vendedor, gostaria de ser informado quando a ia não tiver as informações necessárias para que eu possa acrescentar no banco de dados. (ex: piscina no imóvel, quadra, condomínio, etc) | 36 | 3 | 0% |
 | 9 | Baixa | Como cliente, gostaria de ser reconhecido se sou comprador ou vendedor para ter recomendações que melhor atendam  minhas necessidades. | 45 | 3 | 0% |
@@ -108,6 +108,11 @@ A solução consiste em um **chatbot para o Telegram integrado com uma Inteligê
  <a href="https://github.com/"><img src="https://img.shields.io/badge/github-%23121011.svg?style=for-the-badge&logo=github&logoColor=white"/></a>
  <a href="https://www.atlassian.com/software/jira"><img src="https://img.shields.io/badge/Jira-0052CC?style=for-the-badge&logo=jira&logoColor=white"/></a>
  <a href="https://web.telegram.org/k/"><img src="https://img.shields.io/badge/Telegram-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white"/></a>
+ <a href="https://www.json.org"><img src="https://img.shields.io/badge/JSON-000000?style=for-the-badge&logo=json&logoColor=white"/></a>
+ <a href="https://openai.com/pt-BR/index/whisper/"><img src="https://img.shields.io/badge/Whisper-412991?style=for-the-badge&logo=openai&logoColor=white"/></a>
+ <a href="https://www.openstreetmap.org/#map=5/-15.13/-53.19"><img src="https://img.shields.io/badge/OpenStreetMap-7EBC6F?style=for-the-badge&logo=openstreetmap&logoColor=white"/></a>
+ <a href="https://geopy.readthedocs.io/en/stable/"><img src="https://img.shields.io/badge/GeoPy-4285F4?style=for-the-badge&logo=python&logoColor=white"/></a>
+ 
 
 </div>
 
@@ -130,7 +135,7 @@ A solução consiste em um **chatbot para o Telegram integrado com uma Inteligê
 
 </div>
 
-- Começar uma conversa com o [Bot Imobiliário](https://t.me/Cami_fatecbot)
+- Começar uma conversa com o [Bot Imobiliário](https://t.me/Niemeyer_bot)
 
 <div align="center">
   
