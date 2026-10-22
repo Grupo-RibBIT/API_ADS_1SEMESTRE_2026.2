@@ -68,3 +68,5 @@ if __name__ == "__main__":
     pedido = input("O que você quer pesquisar? ")
     saida = pesquisador(pedido=pedido)
     print(saida.resposta)
+#bolacha
+
