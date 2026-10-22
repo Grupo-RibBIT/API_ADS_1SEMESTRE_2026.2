@@ -17,7 +17,7 @@
   <a href ="#dod">DoD</a>  |
 </p>
 
-> **Status do Projeto:** Em Desenvolvimento ⏳
+> **Status do Projeto:** Concluído ✅
 
 ## 🏅 Desafio <a id="desafio"></a>
 
@@ -27,9 +27,9 @@
 
 | Ranking | Prioridade | User Story | Story Points | Sprint | Status |
 | :------: | :--------: | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :----------: | :----: | :----: |
-| 4 | Alta | Como comprador, gostaria de me comunicar com o chatbot por áudio para ser acessível para um maior número de pessoas. | 40 | 2 | 0% |
-| 5 | Média | Como cliente, gostaria de saber quais são os requisitos mais procurados com base no histórico de pesquisas para saber as tendências do mercado atual. | 40 | 2 | 0% |
-| 6 | Média | Como cliente, gostaria de ter acesso a notícias positivas recentes relacionadas à região do imóvel para ter mais argumentos de venda. | 20 | 2 | 0% |
+| 4 | Alta | Como comprador, gostaria de me comunicar com o chatbot por áudio para ser acessível para um maior número de pessoas. | 40 | 2 | 100% |
+| 5 | Média | Como cliente, gostaria de saber quais são os requisitos mais procurados com base no histórico de pesquisas para saber as tendências do mercado atual. | 40 | 2 | 100% |
+| 6 | Média | Como cliente, gostaria de ter acesso a notícias positivas recentes relacionadas à região do imóvel para ter mais argumentos de venda. | 20 | 2 | 100% |
 
 ## 🏅 DoR - Definition of Ready <a id="dor"></a>
 
