@@ -15,7 +15,7 @@ from geopy.geocoders import Nominatim
 
 #Configuração do Bot/Telegram e do LLM
 
-API_TOKEN = '8996078250:AAEUE_ZB-zEMCLqs0opeT6up2zcl1MWbRQA'
+API_TOKEN = 'YOUR API TOKEN'
 bot = telebot.TeleBot(API_TOKEN)
 
 
@@ -30,7 +30,7 @@ modelo_whisper = whisper.load_model("small")
 
 list_fotos_apt = ["kamen-nikolov-fin","maxim-dorokhov","valmik-shah"]
 
-path_csv = "apartamentos_sp_estruturado.csv"
+path_csv = "YOUR PATH CSV"
 
 TiposFiltro = Literal["preço_num","Área","Endereço","Quartos","Banheiros","Vagas_de_estacionamento"]
 
