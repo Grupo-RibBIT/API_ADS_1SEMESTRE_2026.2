@@ -1,79 +1,59 @@
-from newsapi import NewsApiClient
-import requests
+from duckduckgo_search import DDGS
+import telebot
+import dspy
 
-# Insira aqui o Token do seu bot (obtido com o @BotFather)
+# Substitua pelo token gerado pelo BotFather
 TOKEN = "Seu_Token"
-# Insira aqui o ID do chat ou canal
-CHAT_ID = "Seu_Chat_ID"
-# Inicialize o cliente com a sua chave de API
-newsapi = NewsApiClient(api_key="Sua_Chave_do_News_API_que_pode_ser_criado_no_site_do_News_API")
+bot = telebot.TeleBot(TOKEN)
 
-# Busca por notícias (input) que recebe por entrada um dos diálogos do bot
+# Substitua pelo seu chat_id numérico (ex: 123456789)
+CHAT_ID = "Seu_Chat_ID
 
-x = input("Digite o assunto da notícia: ")
+# Parte relacionada a função de buscador (US1 - A)
+@bot.message_handler(commands=["start", "ajuda"])
+def enviar_pergunta(mensagem):
+    # O bot envia a mensagem e registra qual função deve ser chamada a seguir
+    msg = bot.send_message(
+        mensagem.chat.id, "Deseja notícias de qual localidade?"
+    )
+    bot.register_next_step_handler(msg, processar_nome)
+    return mensagem
 
-# Modelo de filtro simples, com o gerador de notícias da biblioteca News API
-top_headlines = newsapi.get_everything(
-    q=f"Me mostre notícias positivas da região de {x}",
-    language="pt",
-    sort_by="publishedAt",
-    page_size=5,  # Quantidade de notícias que deseja exibir
-)
+def processar_nome(mensagem):
+    # 'mensagem.text' contém o input digitado pelo usuário
+    localidade = mensagem.text
+    bot.send_message(
+        mensagem.chat.id,
+        f"Obrigado! Já já iremos apresentar notícias da localidade {localidade} que você escolheu, para sua comodidade!",
+    )
 
-lista = []
+    # Chamar a busca e o envio de notícias dentro do fluxo após receber a localidade
+    enviar_noticias(mensagem.chat.id, localidade)
+    return mensagem
 
-lista_maior = []
+def enviar_noticias(chat_id, localidade):
+    try:
+        # Parte Relacionada a função output das notícias (US1 - B)
+        results = DDGS().news(query=localidade, max_results=5)
 
-# Parte que imprime os títulos e as fontes das notícias
-if top_headlines["status"] == "ok":
-  articles = top_headlines["articles"]
-  for i, article in enumerate(articles, 1):
-    print(f"{i}. {article['title']}")
-    print(f"   Fonte: {article['source']['name']}")
-    print(f"   Link: {article['url']}\n")
+        texto_formatado = ""
+        for i, noticia in enumerate(results, 1):
+            texto_formatado += f"Notícia {i}:\n"
+            texto_formatado += f"Título: {noticia.get('title')}\n"
+            texto_formatado += f"Data: {noticia.get('date')}\n"
+            texto_formatado += f"Fonte: {noticia.get('source')}\n"
+            texto_formatado += f"Link: {noticia.get('url')}\n"
+            texto_formatado += f"Resumo: {noticia.get('body')}\n"
+            texto_formatado += "-" * 40 + "\n"
 
-    lista = [
+        if not texto_formatado:
+            texto_formatado = f"Nenhuma notícia encontrada para: {localidade}"
 
-      f"{i}. {article['title']}"
-      f"   Fonte: {article['source']['name']}"
-      f"   Link: {article['url']}\n"
-    
-    ]
+        # Exibe o texto final no console e envia para o chat
+        print(texto_formatado)
+        bot.send_message(chat_id, texto_formatado)
+    except Exception as e:
+        print(f"Erro ao buscar notícias: {e}")
+        bot.send_message(chat_id, "Desculpe, ocorreu um erro ao buscar as notícias.")
 
-    lista_maior.append(lista)
-
-
-
-    
-else:
-  print("Erro ao buscar notícias.")
-
-#Parte do código responsável por mandar as notícias ao telegram
-
-def enviar_noticia(mensagem):
-  url = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
-  payload = {"chat_id": CHAT_ID, "text": mensagem, "parse_mode": "Markdown"}
-  response = requests.post(url, json=payload)
-  return response.json()
-
-# Exemplo de uso
-
-
-n = 0
-
-while n <= 4:
-
-  tupla = tuple(lista_maior[n])
-
-  texto_da_noticia = tupla
-
-  enviar_noticia(texto_da_noticia)
-
-  n += 1
-
-
-
-
-
-
-
+bot.infinity_polling()
