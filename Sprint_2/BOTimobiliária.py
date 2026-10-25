@@ -5,18 +5,25 @@ import random
 import re  # Biblioteca de Expressões Regulares (usada para extrair números de textos)
 import pandas as pd  # Biblioteca para manipulação de dados e leitura do arquivo CSV
 import time
+import threading
 from typing import Literal
+import os
+import numpy as np
+import whisper
+from pydub import AudioSegment
 
 from geopy.geocoders import Nominatim
 
 #Configuração do Bot/Telegram e do LLM
 
-API_TOKEN = 'YOUR_TOKEN'
+API_TOKEN = 'YOUR_TOKEN_HERE'
 bot = telebot.TeleBot(API_TOKEN)
 
 
 lm = dspy.LM('ollama_chat/qwen2.5-coder:7b', api_base='http://localhost:11434', api_key='ignored')
 dspy.configure(lm=lm)
+
+modelo_whisper = whisper.load_model("small")
 
 geolocator = Nominatim(user_agent="Bottelegram")
 
@@ -24,7 +31,7 @@ geolocator = Nominatim(user_agent="Bottelegram")
 
 list_fotos_apt = ["kamen-nikolov-fin","maxim-dorokhov","valmik-shah"]
 
-path_csv = "API_ADS_1SEMESTRE_2026.2/Sprint_1/apartamentos_sp_estruturado.csv"
+path_csv = "CAMINHO PARA O CSV"
 
 TiposFiltro = Literal["preço_num","Área","Endereço","Quartos","Banheiros","Vagas_de_estacionamento"]
 
@@ -54,6 +61,42 @@ df = corrigindo_preço_dataFrame(df)
 
 # Lista para armazenar o histórico recente das mensagens
 historico_conversa = []
+
+# ==========================================
+# LÓGICA DE ACUMULAÇÃO DE MENSAGENS (DEBOUNCE)
+# ==========================================
+user_messages = {}
+timers = {}
+TEMPO_ESPERA = 15.0  # Segundos que o bot espera após a última mensagem para responder
+
+class MockMessage:
+    """Classe auxiliar para simular o objeto message do telebot com o texto acumulado."""
+    def __init__(self, chat_id, text):
+        self.chat_id = chat_id
+        self.text = text
+        class Chat:
+            def __init__(self, cid):
+                self.id = cid
+        self.chat = Chat(chat_id)
+
+def processar_mensagens_acumuladas(chat_id: int):
+    """Função chamada após o tempo de espera esgotar."""
+    mensagens = user_messages.pop(chat_id, [])
+    timers.pop(chat_id, None)
+
+    if not mensagens:
+        return
+
+    # Junta o texto de todas as mensagens com quebra de linha
+    texto_completo = "\n".join(mensagens)
+    print(f"Processando {len(mensagens)} mensagens acumuladas do chat {chat_id}...")
+
+    # Cria o objeto de mensagem simulado para manter compatibilidade com o pipeline
+    mock_msg = MockMessage(chat_id, texto_completo)
+    
+    # Executa a pipeline do bot imobiliária com o texto completo acumulado
+    processar_mensagem(mock_msg)
+
 
 #Definindo e estruturando as entradas e saídas dos sub-modulos
 
@@ -509,6 +552,53 @@ class BotImobiliária(dspy.Module):
 #Criando uma instância do modulo geral
 bot_recepção = BotImobiliária(dataframe=df)
 
+def processar_mensagem(message):
+   try:
+      print(f"Mensagem incaminhada para o DSPy!!")
+      print(f"Mensagem recebida: {message.text}")
+
+      if not está_rodando:
+        print("Inciando a o bot...")
+        historico_conversa.append(message.text)
+        #Usando a instância com a mensagem que o cliente mandar
+        resultado_interação = bot_recepção(mensagem=message)
+      else:
+        print("Reiniciando o bot...")
+        message.text = historico_conversa[-1] + ", e quero também com " + message.text
+        historico_conversa.append(message.text)
+        #Usando a instância com a mensagem que o cliente mandar
+        resultado_interação = bot_recepção(mensagem=message)
+
+      print(f"DSPY terminou o processamento.!")
+
+   except Exception as e:
+        print(f"[Erro] {e}")
+        bot.send_message(message.chat.id, f"❌ Erro ao processar a mensagem: {str(e)}")
+
+def transcrever_audio_whisper(caminho_arquivo: str) -> str:
+    """Padroniza o áudio em memória (16kHz Mono PCM 16-bit) e realiza a transcrição
+       otimizada usando o modelo Whisper."""
+    
+    # Carrega o arquivo de áudio (.ogg / .wav) e padroniza para o formato ideal para o whisper
+    audio = AudioSegment.from_file(caminho_arquivo)
+    audio = audio.set_frame_rate(16000).set_channels(1).set_sample_width(2)
+
+    ''' Converte os bytes bruto em array NumPy float32 normalizado em ponto flutuante(-1.0 a 1.0) 
+        evitando explosão de gradiente, portanto perda de sentido'''
+    raw_data = audio.raw_data
+    audio_np = (
+        np.frombuffer(raw_data, dtype=np.int16).astype(np.float32) / 32768.0
+    )
+
+    # Transcreve com o Whisper
+    resultado = modelo_whisper.transcribe(
+        audio_np, language="pt", fp16=False  # fp16=False garante compatibilidade com CPU
+    )
+
+    # Retorna o texto limpo
+    return resultado.get("text", "").strip()
+
+
 #NOVO: lista central dos filtros que a saudação está autorizada a mencionar.
 # Importante: manter esta lista sincronizada com os filtros realmente aceitos pelo código.
 FILTROS_DISPONIVEIS_START = [
@@ -635,9 +725,53 @@ def tratar_botoes_resultados(call):
     bot.send_message(chat_id, mensagem)
 
 
+@bot.message_handler(content_types=['voice', 'audio'])
+def processar_audio(message):
+    chat_id = message.chat.id
+    temp_audio_path = f"temp_voice_{message.message_id}.ogg"
+
+    try:
+        bot.send_chat_action(chat_id, 'typing')
+        bot.send_message_draft(message.chat.id,20,'')
+
+        # Download do áudio enviado no Telegram
+        file_info = bot.get_file(message.voice.file_id if message.voice else message.audio.file_id)
+        downloaded_file = bot.download_file(file_info.file_path)
+
+        with open(temp_audio_path, 'wb') as new_file:
+            new_file.write(downloaded_file)
+
+        # Transcrição via Whisper
+        texto_transcrito = transcrever_audio_whisper(temp_audio_path)
+
+        if not texto_transcrito:
+            bot.send_message(chat_id, "⚠️ Não consegui entender o áudio.")
+            return
+
+        # Atribui o texto transcrito à mensagem
+        message.text = texto_transcrito
+
+        processar_mensagem(message)
+        
+        # Exibe a transcrição no terminal
+        print(f"[Transcrição] Texto: {texto_transcrito}")
+
+    except Exception as e:
+        print(f"[Erro no Áudio] {e}")
+        bot.send_message(chat_id, f"❌ Erro ao processar o áudio: {str(e)}")
+
+    finally:
+        # Exclusão do arquivo temporário
+        if os.path.exists(temp_audio_path):
+            os.remove(temp_audio_path)
+
+
+
 @bot.message_handler(func=lambda message: True)
 def reply_hi(message):
-  bot.send_message_draft(message.chat.id,20,'')
+  chat_id = message.chat.id
+  texto = message.text
+
   print("Mensagem recebida!")
 
   # ADICIONADO: filtros extras são aplicados somente aos resultados atuais, não ao DataFrame original.
@@ -670,16 +804,23 @@ def reply_hi(message):
   if estado and estado.get("aguardando_nova_pesquisa"):
     estados_pesquisa.pop(message.chat.id, None)
 
-  if not está_rodando:
-    print("Inciando a o bot...")
-    historico_conversa.append(message.text)
-    #Usando a instância com a mensagem que o cliente mandar
-    resultado_interação = bot_recepção(mensagem=message)
-  else:
-    print("Reiniciando o bot...")
-    message.text = historico_conversa[-1] + ", e quero também com " + message.text
-    historico_conversa.append(message.text)
-    #Usando a instância com a mensagem que o cliente mandar
-    resultado_interação = bot_recepção(mensagem=message)
+  # 1. Inicializa a lista do chat se não existir
+  if chat_id not in user_messages:
+      user_messages[chat_id] = []
+
+  # 2. Adiciona a nova mensagem à lista
+  user_messages[chat_id].append(texto)
+  print(f"Mensagem recebida e acumulada de {chat_id}: {texto}")
+
+  # 3. Se já houver um timer rodando para este chat, cancela-o (reseta o cronômetro)
+  if chat_id in timers:
+      timers[chat_id].cancel()
+
+  # 4. Cria um novo timer de 15 segundos. Se o usuário mandar outra mensagem antes disso,
+  # o timer anterior é cancelado e a contagem reinicia do zero.
+  timer = threading.Timer(TEMPO_ESPERA, processar_mensagens_acumuladas, args=(chat_id,))
+  timers[chat_id] = timer
+  timer.start()
+  
 
 bot.polling()
