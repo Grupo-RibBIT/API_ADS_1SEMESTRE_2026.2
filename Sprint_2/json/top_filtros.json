@@ -1,0 +1,29 @@
+{
+  "filtros": [
+    {
+      "filtro": "preço_num",
+      "pesquisas": 0
+    },
+    {
+      "filtro": "Área",
+      "pesquisas": 0
+    },
+    {
+      "filtro": "Endereço",
+      "pesquisas": 0
+    },
+    {
+      "filtro": "Quartos",
+      "pesquisas": 0
+    },
+    {
+      "filtro": "Banheiros",
+      "pesquisas": 0
+    },
+    {
+      "filtro": "Vagas_de_estacionamento",
+      "pesquisas": 0
+    }
+  ],
+  "ultima_atualizacao": "2026-10-26 08:01:46"
+}

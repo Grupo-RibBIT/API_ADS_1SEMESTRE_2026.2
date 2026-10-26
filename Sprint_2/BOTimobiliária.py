@@ -2,7 +2,6 @@
 import dspy
 import telebot
 import random
-import re  # Biblioteca de Expressões Regulares (usada para extrair números de textos)
 import pandas as pd  # Biblioteca para manipulação de dados e leitura do arquivo CSV
 import time
 import threading
@@ -11,6 +10,8 @@ import os
 import numpy as np
 import whisper
 from pydub import AudioSegment
+import usando_json
+from ddgs import DDGS
 
 from geopy.geocoders import Nominatim
 
@@ -31,11 +32,12 @@ geolocator = Nominatim(user_agent="Bottelegram")
 
 list_fotos_apt = ["kamen-nikolov-fin","maxim-dorokhov","valmik-shah"]
 
-path_csv = "CAMINHO PARA O CSV"
+path_csv = "PATH PARA O CSV"
 
 TiposFiltro = Literal["preço_num","Área","Endereço","Quartos","Banheiros","Vagas_de_estacionamento"]
 
 está_rodando = False
+
 
 #Fazendo o dataframe do panda
 def transforma_csv_em_dataFrame(caminho_csv):
@@ -58,9 +60,6 @@ def corrigindo_preço_dataFrame(p_df):
   return p_df
 
 df = corrigindo_preço_dataFrame(df)
-
-# Lista para armazenar o histórico recente das mensagens
-historico_conversa = []
 
 # ==========================================
 # LÓGICA DE ACUMULAÇÃO DE MENSAGENS (DEBOUNCE)
@@ -137,7 +136,9 @@ class EscolhasGerenciador(dspy.Signature):
   lista_de_ferramentas:list = dspy.InputField(desc="Lista de ferramentas usadas pelos sub-modulos")
   precisa_de_localizacao:bool = dspy.OutputField(desc="Define se o cliente mencionou/pediu localização de um imóvel, que precisará ser enviada")
   precisa_de_apresentacao:bool = dspy.OutputField(desc="Define se o cliente mencionou/pediu a apresentação ou mini-apresentação de um imóvel, que precisará ser enviada")
-  precisa_de_busca_no_csv:bool = dspy.OutputField(desc="Define se o cliente mencionou/pediu um imóvel, uma rua, um bairro, ou uma informação sobre um imóvel, que precisará ser buscada no csv")
+  precisa_de_busca_no_csv:bool = dspy.OutputField(desc="Define se o cliente mencionou/pediu um imóvel, uma rua, um bairro, ou uma informação sobre um imóvel, que precisará ser buscada no csv") 
+  precisa_de_notícias:bool = dspy.OutputField(desc="Define se o cliente mencionou/pediu um resumo de como é o bairro, como é morar em determinada região ou deseja informações sobre a vida cotidiana, características, serviços e outros aspectos relevantes")
+  precisa_de_classificação_mais_procurados:bool = dspy.OutputField(desc="Define se o cliente menciou/pediu quais foram os filtros mais usados ou quais foram os critérios mais procurados")
 
 class ExtrairFiltros(dspy.Signature):
   """Extrai filtros de busca de imóveis a partir do pedido do usuário.
@@ -160,7 +161,7 @@ class BoasVindasAssistente(dspy.Signature):
   )
   #define o objetivo geral do bot para evitar promessas de funcionalidades inexistentes.
   funcionalidades: str = dspy.InputField(
-      desc="O bot pesquisa imóveis para compra a partir das características informadas pelo usuário."
+      desc="Texte que contem as funcionalidades e como ativar cada uma delas."
   )
   #este é o texto final que o Handler enviará ao usuário no Telegram.
   mensagem_boas_vindas: str = dspy.OutputField(
@@ -174,6 +175,12 @@ class FiltrosDoCSV(dspy.Signature):
   valor_desejado: dict[TiposFiltro,list] = dspy.InputField(desc="Valores desejados do cliente, se tiver mais de uma variável é um intervalo que engloba esses valores. Se tiver apenas um valor, é um intervalo de 0 até o valor pedido.")
   lista_apartamentos_str:list = dspy.OutputField(desc="Lista dos apartamentos achados pelo filtro em formato de sting")
 
+class PesquisarNoticias(dspy.Signature):
+  """Você é um pesquisador de notícias. Identifique o tema do pedido (provavelmente um bairro da Cidade de São paulo), use a
+  ferramenta pesquisar_noticias e responda em português com um resumo positivo curto do conjunto de notícias, mantendo os links."""
+
+  endereço_pedido: str = dspy.InputField(desc="Pedido do usuário sobre um bairro, ex.: 'como é viver sobre o Vila Mariana'")
+  resumo_positivo: str = dspy.OutputField(desc="Resumo Positivo, com uma abordagem leve e informativa, das notícias encontradas")
 
 # Qwen redige mensagens naturais para a navegação. As contagens são
 # calculadas pelo Python e fornecidas ao modelo para evitar números inventados.
@@ -188,22 +195,37 @@ class MensagemInteracao(dspy.Signature):
 
 #Lista de feramentas/funções para serem usadas pelos sub-modulos
 
-def salvar_no_historico(chat_id_telegram, texto: str):
-  """
-  Adiciona uma nova mensagem ao histórico do sistema e garante que
-  o limite máximo de 10 mensagens armazenadas seja respeitado.
-  """
-  # Insere a mensagem formatada no final da lista
-  historico_conversa.append(f"{chat_id_telegram}: {texto}")
-
-  # Se a lista ultrapassar 10 itens, remove o item mais antigo (primeiro elemento)
-  if len(historico_conversa) > 10:
-      historico_conversa.pop(0)
-
 def mandar_mensagem_pelo_telegram(mensagem_text:str,chat_id_telegram:str|int):
   '''Manda mensagem para o cliente,identificado pelo chat_id, atraves do telegram'''
   bot.send_message(chat_id = chat_id_telegram,text=mensagem_text)
   return f"Mensagem dizendo: '{mensagem_text}' foi enviada para o cliente "
+
+def pesquisar_noticias(localidade_extraída_do_pedido:str):
+  try:
+    # Parte Relacionada a função output das notícias (US1 - B)
+    results = DDGS().news(query=f"notícias positivas sobre o bairro {localidade_extraída_do_pedido} na Cidade de São Paulo (capital)", max_results=5)
+
+    texto_formatado = ""
+
+    for i, noticia in enumerate(results, 1):
+      texto_formatado += f"Notícia {i}:\n"
+      texto_formatado += f"Título: {noticia.get('title')}\n"
+      texto_formatado += f"Data: {noticia.get('date')}\n"
+      texto_formatado += f"Fonte: {noticia.get('source')}\n"
+      texto_formatado += f"Link: {noticia.get('url')}\n"
+      texto_formatado += f"Resumo: {noticia.get('body')}\n"
+      texto_formatado += "-" * 40 + "\n"
+
+    if not texto_formatado:
+      texto_formatado = f"Nenhuma notícia encontrada para: {localidade_extraída_do_pedido}"
+
+    # Exibe o texto final no console e envia para o chat
+    print(texto_formatado)
+
+    return texto_formatado
+  except Exception as e:
+    print(f"Erro ao buscar notícias: {e}")
+    return "Desculpe, ocorreu um erro ao buscar as notícias."
 
 
 def montar_mini_apresentação_e_mandar_pelo_telegram(
@@ -268,15 +290,6 @@ def enviar_localizacao_no_telegram(endereço_apartamento, chat_id_telegram):
   return send_coords()
 
 
-def transformar_dataframe_para_string(df_filtrado):
-  '''Transforma o dataFrame filtrado em uma lista com os apartamentos encontrados'''
-  apartamentos_encontrados = []
-  for idx, (_, linha) in enumerate(df_filtrado.iterrows(), 1):
-    linha_csv_str = linha.to_frame().T.to_csv(index=False)
-    apartamentos_encontrados.append(linha_csv_str)
-  return apartamentos_encontrados
-   
-
 #Filtros Csv
 def filtrar_csv(tipo_de_filtragem,df_bruto,valores_desejados:dict[TiposFiltro,list]):
   '''Filtra o DataFrame pelo tipo de filtragem escolhido determinado valor/intervalo de valores desejado pelo cliente'''
@@ -333,8 +346,8 @@ ferramentas_dos_modulos = [mandar_mensagem_pelo_telegram,
                            montar_mini_apresentação_e_mandar_pelo_telegram, 
                            enviar_localizacao_no_telegram, 
                            mandar_mensagem_pelo_telegram, 
-                           filtrar_csv, 
-                           transformar_dataframe_para_string,
+                           filtrar_csv,
+                           pesquisar_noticias,
                            ]
 
 # ADICIONADO: aplica filtros adicionais à seleção atual sem tocar no DataFrame original.
@@ -378,6 +391,8 @@ class BotImobiliária(dspy.Module):
     self.extrator = dspy.ChainOfThought(ExtrairFiltros)
 
     self.arquiteto = dspy.ChainOfThought(DescriçãoApartamento)
+
+    self.pesquisador = dspy.ReAct(PesquisarNoticias, tools=[pesquisar_noticias])
 
     self.apresentador = dspy.ReAct(CaracterísticasApresentação, tools=[montar_mini_apresentação_e_mandar_pelo_telegram])
 
@@ -487,12 +502,14 @@ class BotImobiliária(dspy.Module):
           
           '''
 
-    if escopo_do_pedido.precisa_de_busca_no_csv == True:
+    if escopo_do_pedido.precisa_de_busca_no_csv == True and not (escopo_do_pedido.precisa_de_notícias == True or escopo_do_pedido.precisa_de_classificação_mais_procurados == True):
         inicio = time.time()
         filtros_de_pesquisa = self.extrator(texto_usuario=mensagem.text)
         fim = time.time()
         print(f"Filtros obtidos em {fim - inicio:.2f} segundos")
         print(filtros_de_pesquisa)
+
+        usando_json.registrar_filtros_no_ranking(filtros_de_pesquisa.tipos_de_filtro)
 
         todos_os_filtros = ["preço_num","Área","Endereço","Quartos","Banheiros","Vagas_de_estacionamento"]
         filtros_não_usados = [filtro for filtro in todos_os_filtros if filtro not in filtros_de_pesquisa.tipos_de_filtro]
@@ -524,7 +541,7 @@ class BotImobiliária(dspy.Module):
         "aguardando_nova_pesquisa": False
         }
 
-        print("Estado atual: ", estado)
+        # print("Estado atual: ", estado)
         
         estados_pesquisa[mensagem.chat.id] = estado
     
@@ -533,6 +550,25 @@ class BotImobiliária(dspy.Module):
         está_rodando = False
         return dspy.Prediction("Busca realizada e primeiro lote apresentado.")
 
+    if escopo_do_pedido.precisa_de_notícias == True:
+      inicio = time.time()
+      resumo = self.pesquisador(endereço_pedido=mensagem.text)
+      fim = time.time()
+      print(f"Filtros obtidos em {fim - inicio:.2f} segundos")
+      print('Resumo das Notícias: ', resumo)
+
+      bot.send_message(mensagem.chat.id,resumo.resumo_positivo)
+
+    if escopo_do_pedido.precisa_de_classificação_mais_procurados == True:
+      classificação = usando_json.ler_top_filtros()
+
+      texto_classificação = f"As pessoas estão levando mais em consideração quando procuram apartamentos os seguintes pontos: \n"
+
+      for filtro_valor in classificação["filtros"]:
+        texto_classificação += f" - {filtro_valor["filtro"]}: {filtro_valor["pesquisas"]}\n"
+
+      bot.send_message(mensagem.chat.id, texto_classificação)
+            
     # Comportamento anterior mantido para mensagens que não iniciam uma busca no CSV.
     linha_de_pensamento = f"""
       ##Resposta Momentânea
@@ -559,13 +595,13 @@ def processar_mensagem(message):
 
       if not está_rodando:
         print("Inciando a o bot...")
-        historico_conversa.append(message.text)
+        usando_json.salvar_mensagem_no_histórico(message.chat.id,message.text)
         #Usando a instância com a mensagem que o cliente mandar
         resultado_interação = bot_recepção(mensagem=message)
       else:
         print("Reiniciando o bot...")
-        message.text = historico_conversa[-1] + ", e quero também com " + message.text
-        historico_conversa.append(message.text)
+        message.text = usando_json.ler_histórico_json(message.chat.id)[-1] + ", e quero também com " + message.text
+        usando_json.salvar_mensagem_no_histórico(message.chat.id,message.text)
         #Usando a instância com a mensagem que o cliente mandar
         resultado_interação = bot_recepção(mensagem=message)
 
@@ -621,35 +657,28 @@ boas_vindas_ia = dspy.Predict(BoasVindasAssistente)
 # Deve ficar antes do Handler genérico abaixo, para que /start não caia no fluxo normal.
 @bot.message_handler(commands=["start"])
 def iniciar_conversa(message):
-  # NOVO: tenta gerar uma saudação com a IA local, para que seja mais fluido.
-  try:
-    resposta = boas_vindas_ia(
-        filtros_disponiveis=FILTROS_DISPONIVEIS_START,
-        # Estas instruções acompanham a lista fechada e restringem o conteúdo da resposta.
-        funcionalidades=(
-            "O assistente pesquisa imóveis para compra a partir das características informadas. "
-            "Só pode mencionar os filtros listados em filtros_disponiveis. "
-            "Não diga que já pesquisou ou encontrou imóveis. "
-            "Convide o usuário a descrever o imóvel que procura."
-        ),
-    )
-    # Remove espaços extras antes de enviar a mensagem ao Telegram.
-    texto = resposta.mensagem_boas_vindas.strip()
-    if not texto:
-      raise ValueError("A IA retornou uma mensagem de boas-vindas vazia.")
-  except Exception as erro:
-    # NOVO: alternativa caso o Ollama falhe, demore ou retorne uma resposta vazia.
-    # A recepção continua funcionando mesmo quando não é possível usar a IA.
-    print(f"Erro ao gerar boas-vindas com a IA: {erro}")
-    texto = (
-        "Olá! Bem-vindo ao Assistente Imobiliário! 🏡\n\n"
-        "Posso ajudar a pesquisar imóveis para compra. Você pode informar "
-        "preço, área útil, endereço, quartos, banheiros e vagas de estacionamento.\n\n"
-        "Conte como é o imóvel que você está procurando para começarmos."
-    )
+  texto = (
+          "Olá! Bem-vindo ao Assistente Imobiliário! 🏡\n\n"
+          "Posso ajudar em: \n "
+          " - Pesquisa de apartamentos\n"
+          "   Ex: 'Quero ver apartamentos no Butantã por até 1 milhão'.\n\n"
+          " - Carcterísticas mais procuradas nos apartamentos\n"
+          "   Ex: 'Quais os filtros mais pesquisados?'.\n\n"
+          " - Como é morar em determinado bairro em São Paulo\n"
+          "   Ex: 'Como é morar na Vila Mariana ?'.\n\n"
+          "Vamos lá !!!"
+      )
 
   # NOVO: envia a saudação ao mesmo chat que executou o comando /start.
   bot.send_message(message.chat.id, texto)
+
+@bot.message_handler(commands=["historico"])
+def mostrar_historico(message):
+    id_cliente = str(message.from_user.id)
+
+    texto = usando_json.exibir_historico(id_cliente)
+
+    bot.reply_to(message, texto)
 
 # ADICIONADO: callbacks dos botões inline de navegação dos resultados.
 @bot.callback_query_handler(func=lambda call: call.data in {"imob_filtro", "imob_proximos", "imob_nova"})
@@ -780,6 +809,9 @@ def reply_hi(message):
     estado["aguardando_filtro"] = False
     try:
       filtros_novos = bot_recepção.extrator(texto_usuario=message.text)
+
+      # NOVO: filtros acrescentados depois também entram no ranking
+      usando_json.registrar_filtros_no_ranking(filtros_novos.tipos_de_filtro)
       # ADICIONADO: aplica cada critério ao conjunto já encontrado; por exemplo,
       # "3 quartos" significa exatamente três quartos, não até três.
       df_refinado = aplicar_filtros_adicionais(
