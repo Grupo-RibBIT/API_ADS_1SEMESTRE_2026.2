@@ -17,7 +17,7 @@ from geopy.geocoders import Nominatim
 
 #Configuração do Bot/Telegram e do LLM
 
-API_TOKEN = 'YOUR_TOKEN_HERE'
+API_TOKEN = 'YOUR_TOKEN'
 bot = telebot.TeleBot(API_TOKEN)
 
 
@@ -145,11 +145,11 @@ class ExtrairFiltros(dspy.Signature):
   
     REGRAS:
       - Não usar variáveis None
-      -Não usar 'float('inf')' nos valores desejados
+      - Não usar 'float('inf')' nos valores desejados
   """
   texto_usuario: str = dspy.InputField()
   tipos_de_filtro: list[TiposFiltro] = dspy.OutputField(desc="Lista com os tipos de filtragem/colunas do CSV,sendo 'Área' a área últil construida do apartamento")
-  valor_desejado: dict[TiposFiltro,list] = dspy.OutputField(desc="Valores desejados do cliente com base nos tipos de filtro, se tiver apenas um valor, é um intervalo de 0 até o valor pedido. Se tiver mais de uma variável é um intervalo que engloba esses valores")
+  valor_desejado: dict[TiposFiltro,list] = dspy.OutputField(desc="Valores desejados do cliente com base nos tipos de filtro, se tiver apenas um valor, é um intervalo de 0 até o valor pedido. Se tiver mais de uma variável é um intervalo que engloba esses valores. Nunca usar 'float('inf')' nos valores desejados")
 
 # Adicionado: assinatura DSPy usada exclusivamente para criar a mensagem do /start.
 # Ela separa as informações fornecidas pelo código da redação produzida pela IA.
@@ -504,7 +504,7 @@ class BotImobiliária(dspy.Module):
 
     if escopo_do_pedido.precisa_de_busca_no_csv == True and not (escopo_do_pedido.precisa_de_notícias == True or escopo_do_pedido.precisa_de_classificação_mais_procurados == True):
         inicio = time.time()
-        filtros_de_pesquisa = self.extrator(texto_usuario=mensagem.text)
+        filtros_de_pesquisa = self.extrator(texto_usuario=(mensagem.text + ""))
         fim = time.time()
         print(f"Filtros obtidos em {fim - inicio:.2f} segundos")
         print(filtros_de_pesquisa)
