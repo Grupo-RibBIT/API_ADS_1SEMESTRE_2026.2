@@ -91,7 +91,7 @@ A solução consiste em um **chatbot para o Telegram integrado com uma Inteligê
 | Sprint | Período | Documentação | Link do Vídeo |
 | :---------: | :------------: | :---: | :---: |
 | 📌 SPRINT 1 | 07/09 - 27/09 | [Sprint 1 Docs](./Docs/Sprints/Sprint-1.md) | [Vídeo no Youtube](https://youtu.be/Ei-zJ9vX5ko)|
-| 📌 SPRINT 2 | 05/10 - 25/10 | [Sprint 2 Docs](./Docs/Sprints/Sprint-2.md) | - |
+| 📌 SPRINT 2 | 05/10 - 25/10 | [Sprint 2 Docs](./Docs/Sprints/Sprint-2.md) | [Vídeo no Youtube](https://www.youtube.com/watch?v=XQPT6sW2TAQ) |
 | 📌 SPRINT 3 | 02/11 - 22/11 | [Sprint 3 Docs](./Docs/Sprints/Sprint-3.md) | - |
 
 </div>
