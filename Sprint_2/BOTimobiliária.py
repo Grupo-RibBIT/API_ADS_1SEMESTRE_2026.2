@@ -17,7 +17,7 @@ from geopy.geocoders import Nominatim
 
 #Configuração do Bot/Telegram e do LLM
 
-API_TOKEN = '8972674446:AAHjOMxPTOBmVMTLSK0ve8fp2QeC14UDQ3k'
+API_TOKEN = 'YOUR_TOKEN'
 bot = telebot.TeleBot(API_TOKEN)
 
 
