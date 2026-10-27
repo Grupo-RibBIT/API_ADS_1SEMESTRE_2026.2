@@ -17,7 +17,7 @@ from geopy.geocoders import Nominatim
 
 #Configuração do Bot/Telegram e do LLM
 
-API_TOKEN = 'YOUR_TOKEN'
+API_TOKEN = '8972674446:AAHjOMxPTOBmVMTLSK0ve8fp2QeC14UDQ3k'
 bot = telebot.TeleBot(API_TOKEN)
 
 
@@ -32,7 +32,7 @@ geolocator = Nominatim(user_agent="Bottelegram")
 
 list_fotos_apt = ["kamen-nikolov-fin","maxim-dorokhov","valmik-shah"]
 
-path_csv = "PATH PARA O CSV"
+path_csv = "C:/Study/FATEC_2026-02/01_SEMESTRE/03_API/Projeto/Sprint2_teste/JSON/apartamentos_sp_estruturado.csv"
 
 TiposFiltro = Literal["preço_num","Área","Endereço","Quartos","Banheiros","Vagas_de_estacionamento"]
 
@@ -149,7 +149,7 @@ class ExtrairFiltros(dspy.Signature):
   """
   texto_usuario: str = dspy.InputField()
   tipos_de_filtro: list[TiposFiltro] = dspy.OutputField(desc="Lista com os tipos de filtragem/colunas do CSV,sendo 'Área' a área últil construida do apartamento")
-  valor_desejado: dict[TiposFiltro,list] = dspy.OutputField(desc="Valores desejados do cliente com base nos tipos de filtro, se tiver apenas um valor, é um intervalo de 0 até o valor pedido. Se tiver mais de uma variável é um intervalo que engloba esses valores. Nunca usar 'float('inf')' nos valores desejados")
+  valor_desejado: dict[TiposFiltro,list] = dspy.OutputField(desc="Valores desejados do cliente com base nos tipos de filtro, se tiver apenas um valor, é um intervalo de 0 até o valor pedido. Se tiver mais de uma variável é um intervalo que engloba esses valores. Nunca usar 'None' ou 'float('inf')' nos valores desejados")
 
 # Adicionado: assinatura DSPy usada exclusivamente para criar a mensagem do /start.
 # Ela separa as informações fornecidas pelo código da redação produzida pela IA.
@@ -169,11 +169,11 @@ class BoasVindasAssistente(dspy.Signature):
   )
 
 class FiltrosDoCSV(dspy.Signature):
-  '''Acha apartamentos que se encaixam no requisitos do cliente dentro do csv'''
+  '''Acha apartamentos no CSV que se encaixem na mensagem do cliente.'''
   df_bruto = dspy.InputField(desc="Dataframe completo dos apartamentos")
   tipos_de_filtro: list[TiposFiltro] = dspy.InputField(desc="Lista com os tipos de filtragem/colunas do CSV, sendo 'Área' a área útil construída do apartamento")
-  valor_desejado: dict[TiposFiltro,list] = dspy.InputField(desc="Valores desejados do cliente, se tiver mais de uma variável é um intervalo que engloba esses valores. Se tiver apenas um valor, é um intervalo de 0 até o valor pedido.")
-  lista_apartamentos_str:list = dspy.OutputField(desc="Lista dos apartamentos achados pelo filtro em formato de sting")
+  valor_desejado: dict[TiposFiltro,list] = dspy.InputField(desc="Valores inteiros desejados do cliente com base nos tipos de filtro, se tiver apenas um valor, é um intervalo de 0 até o valor pedido. Se tiver mais de uma variável, é um intervalo entre esses valores. Nunca usar 'None' ou 'float('inf')' nos valores desejados")
+  lista_apartamentos_str:list = dspy.OutputField(desc="Lista dos apartamentos achados pelo filtro em formato de string")
 
 class PesquisarNoticias(dspy.Signature):
   """Você é um pesquisador de notícias. Identifique o tema do pedido (provavelmente um bairro da Cidade de São paulo), use a
@@ -300,6 +300,27 @@ def filtrar_csv(tipo_de_filtragem,df_bruto,valores_desejados:dict[TiposFiltro,li
     df = df.dropna(subset=[tipo])
     print("Os valores desejados são: ",valores_desejados)
     valores_desejado_atual= valores_desejados[tipo]
+
+    #NOVO: correção dos filtros para não ter valores nulos ou infinitos, ou apenas o valor 0
+    
+    if 'None' in valores_desejado_atual:
+       valores_desejado_atual.remove('None')
+                
+    if "float('inf')" in valores_desejado_atual:
+       valores_desejado_atual.remove("float('inf')")
+       
+    if valores_desejado_atual == [0] or valores_desejado_atual == ['0']:
+       continue
+    
+    if tipo == "Área":
+       
+       if len(valores_desejado_atual) >= 2:
+          v_min, v_max = min(valores_desejado_atual[0], valores_desejado_atual[1]), max(valores_desejado_atual[0], valores_desejado_atual[1])
+       else:
+          v_min, v_max = 0, max(valores_desejado_atual)
+          df = df[
+              (df[tipo] >= v_min) & (df[tipo] <= v_max)
+          ]
     if tipo == "Endereço":
       df = df[
           df[tipo]
@@ -590,11 +611,11 @@ bot_recepção = BotImobiliária(dataframe=df)
 
 def processar_mensagem(message):
    try:
-      print(f"Mensagem incaminhada para o DSPy!!")
+      print(f"Mensagem encaminhada para o DSPy!")
       print(f"Mensagem recebida: {message.text}")
 
       if not está_rodando:
-        print("Inciando a o bot...")
+        print("Inciando o bot...")
         usando_json.salvar_mensagem_no_histórico(message.chat.id,message.text)
         #Usando a instância com a mensagem que o cliente mandar
         resultado_interação = bot_recepção(mensagem=message)
@@ -605,7 +626,7 @@ def processar_mensagem(message):
         #Usando a instância com a mensagem que o cliente mandar
         resultado_interação = bot_recepção(mensagem=message)
 
-      print(f"DSPY terminou o processamento.!")
+      print(f"DSPY terminou o processamento!")
 
    except Exception as e:
         print(f"[Erro] {e}")
