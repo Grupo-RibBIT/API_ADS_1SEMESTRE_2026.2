@@ -77,8 +77,9 @@ def registrar_filtros_no_ranking(filtros_pesquisados):
                     print(item_pesquisado, "foi encontrado! Um contador foi adicionado no item ", item["filtro"], "do JSON")
                     json_atualizado = True
                     break
-                else:
-                    print("Filtro não encontrado: ", item_pesquisado)
+            
+            if json_atualizado == False:
+                print("Filtro não encontrado: ", item_pesquisado)
             
         if json_atualizado:
             ranking["ultima_atualizacao"] = str(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))

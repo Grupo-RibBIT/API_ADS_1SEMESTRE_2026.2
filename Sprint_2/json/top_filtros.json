@@ -2,28 +2,28 @@
   "filtros": [
     {
       "filtro": "preço_num",
-      "pesquisas": 0
+      "pesquisas": 4
     },
     {
       "filtro": "Área",
-      "pesquisas": 0
+      "pesquisas": 2
     },
     {
       "filtro": "Endereço",
-      "pesquisas": 0
+      "pesquisas": 6
     },
     {
       "filtro": "Quartos",
-      "pesquisas": 0
+      "pesquisas": 2
     },
     {
       "filtro": "Banheiros",
-      "pesquisas": 0
+      "pesquisas": 1
     },
     {
       "filtro": "Vagas_de_estacionamento",
-      "pesquisas": 0
+      "pesquisas": 1
     }
   ],
-  "ultima_atualizacao": "2026-10-26 09:28:04"
+  "ultima_atualizacao": "2026-10-28 09:34:31"
 }
