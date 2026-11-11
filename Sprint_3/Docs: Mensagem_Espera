@@ -1,0 +1,51 @@
+import telebot
+import time
+
+
+# Substitua 'SEU_TOKEN_AQUI' pelo token gerado no BotFather
+TOKEN = "SEU_TOKEN"
+bot = telebot.TeleBot(TOKEN)
+
+
+@bot.message_handler(commands=['start', 'help'])
+def enviar_boas_vindas(message):
+  bot.reply_to(message, 'Olá! Como posso ajudar você hoje?')
+
+n = False
+
+@bot.message_handler(func=lambda m: True)
+def responder_geral(message):
+
+    x = True
+
+    while x == True:
+
+
+
+    
+         bot.reply_to(message,"Aguarde")
+         time.sleep(5)
+         bot.reply_to(message,"...")
+         time.sleep(5)
+         bot.reply_to(message,"Só mais alguns instantes")
+         time.sleep(5)
+         bot.reply_to(message,"...")
+         time.sleep(5)
+
+         #A condição if serve para que haja uma entrada externa, onde não haja mais necessidade
+         # espera, porque a ação já ocorreu.
+
+         if n == True:
+
+             x == False
+
+         else:
+
+             x == True
+  
+
+
+# Inicia o loop de polling para escutar as mensagens
+print('Bot iniciado...')
+bot.polling()
+
