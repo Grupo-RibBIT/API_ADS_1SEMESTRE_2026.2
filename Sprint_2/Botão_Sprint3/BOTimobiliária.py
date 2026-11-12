@@ -1,0 +1,905 @@
+# Biblioteca que o código está usando
+import dspy
+import telebot
+import random
+import pandas as pd  # Biblioteca para manipulação de dados e leitura do arquivo CSV
+import time
+import threading
+from typing import Literal
+import os
+import numpy as np
+import whisper
+from pydub import AudioSegment
+import usando_json
+from ddgs import DDGS
+
+from geopy.geocoders import Nominatim
+
+#Configuração do Bot/Telegram e do LLM
+
+API_TOKEN = '8996078250:AAFCX-65MdBzOJXVFK8E6mdPj2tB_pxtzs8'
+bot = telebot.TeleBot(API_TOKEN)
+
+
+lm = dspy.LM('openai/qwen2.5-coder:7b', api_base='http://localhost:11434/v1', api_key='ollama')
+dspy.configure(lm=lm)
+
+modelo_whisper = whisper.load_model("small")
+
+geolocator = Nominatim(user_agent="Bottelegram")
+
+#Dados externos
+
+list_fotos_apt = ["kamen-nikolov-fin","maxim-dorokhov","valmik-shah"]
+
+path_csv = "apartamentos_sp_estruturado.csv"
+
+TiposFiltro = Literal["preço_num","Área","Endereço","Quartos","Banheiros","Vagas_de_estacionamento"]
+
+está_rodando = False
+
+
+#Fazendo o dataframe do panda
+def transforma_csv_em_dataFrame(caminho_csv):
+  df = pd.read_csv(caminho_csv)
+  return df
+
+df = transforma_csv_em_dataFrame(caminho_csv=path_csv)
+
+def corrigindo_preço_dataFrame(p_df):
+  #p_df = p_df.dropna(subset=["Preço"])
+  p_df["preço_num"] = (
+    p_df["Preço"]
+    .astype(str)
+    .str.replace(r"[^\d,.]", "", regex=True)
+    .str.replace(".", "", regex=False)
+    .str.replace(",", "", regex=False)
+  )
+  p_df["preço_num"] = pd.to_numeric(p_df["preço_num"])
+  #p_df = p_df.dropna(subset=["preço_num"])
+  return p_df
+
+df = corrigindo_preço_dataFrame(df)
+
+# ==========================================
+# LÓGICA DE ACUMULAÇÃO DE MENSAGENS (DEBOUNCE)
+# ==========================================
+user_messages = {}
+timers = {}
+TEMPO_ESPERA = 15.0  # Segundos que o bot espera após a última mensagem para responder
+
+class MockMessage:
+    """Classe auxiliar para simular o objeto message do telebot com o texto acumulado."""
+    def __init__(self, chat_id, text):
+        self.chat_id = chat_id
+        self.text = text
+        class Chat:
+            def __init__(self, cid):
+                self.id = cid
+        self.chat = Chat(chat_id)
+
+def processar_mensagens_acumuladas(chat_id: int):
+    """Função chamada após o tempo de espera esgotar."""
+    mensagens = user_messages.pop(chat_id, [])
+    timers.pop(chat_id, None)
+
+    if not mensagens:
+        return
+
+    # Junta o texto de todas as mensagens com quebra de linha
+    texto_completo = "\n".join(mensagens)
+    print(f"Processando {len(mensagens)} mensagens acumuladas do chat {chat_id}...")
+
+    # Cria o objeto de mensagem simulado para manter compatibilidade com o pipeline
+    mock_msg = MockMessage(chat_id, texto_completo)
+    
+    # Executa a pipeline do bot imobiliária com o texto completo acumulado
+    processar_mensagem(mock_msg)
+
+
+#Definindo e estruturando as entradas e saídas dos sub-modulos
+
+class DescriçãoApartamento(dspy.Signature):
+  '''Traduz a linha do csv do apartamento achado em caracteristicas do apartamento'''
+  linha_do_csv:str = dspy.InputField(desc="Linha que foi encontrada pela filtragem do csv")
+  banheiros:int = dspy.OutputField()
+  quartos:int = dspy.OutputField()
+  área:int = dspy.OutputField()
+  valor:float = dspy.OutputField()
+  estacionamento:int = dspy.OutputField()
+  endereço_apartamento:str = dspy.OutputField()
+
+class CaracterísticasApresentação(dspy.Signature):
+  '''Recebe as características específicas do apartamento e monta uma apresentação'''
+  chat_id_telegram = dspy.InputField(desc="Identificador do usuário que mandou a mensagem no telegram")
+  banheiros:int = dspy.InputField()
+  quartos:int = dspy.InputField()
+  área:int = dspy.InputField()
+  valor:float = dspy.InputField(desc="Usando os pontos de milhar no padrão brasileiro")
+  estacionamento:int = dspy.InputField()
+  fotos = dspy.InputField()
+  apresentação:str = dspy.OutputField(desc="Apresentação seguindo o modelo definido pela ferramenta 'montar_mini_apresentação'")
+
+class EscolhasAtendente(dspy.Signature):
+  '''Simula a resposta de um atendente de imobiliária que recebe a mensagem do cliente e extrai oque ele deseja'''
+  mensagem_do_cliente:str = dspy.InputField()
+  chat_id_telegram = dspy.InputField(desc="Identificador do usuário que mandou a mensagem no telegram")
+  desejo_do_cliente:str = dspy.OutputField(desc="Oque o cliente quer com essa conversa, para ser usado internamente")
+
+
+class EscolhasGerenciador(dspy.Signature):
+  '''Analisa o desejo_do_cliente extraído pelo Atendente e classifica com Bool (True ou False) se a mensagem possui as palavras apresentação e/ou localização e/ou um imóvel
+  REGRAS:
+    - Se o cliente "QUER UM APARTAMENTO" ele deseja também uma apresentação
+  '''
+  analisar_escopo:str = dspy.InputField()
+  lista_de_ferramentas:list = dspy.InputField(desc="Lista de ferramentas usadas pelos sub-modulos")
+  precisa_de_localizacao:bool = dspy.OutputField(desc="Define se o cliente mencionou/pediu localização de um imóvel, que precisará ser enviada")
+  precisa_de_apresentacao:bool = dspy.OutputField(desc="Define se o cliente mencionou/pediu a apresentação ou mini-apresentação de um imóvel, que precisará ser enviada")
+  precisa_de_busca_no_csv:bool = dspy.OutputField(desc="Define se o cliente mencionou/pediu um imóvel, uma rua, um bairro, ou uma informação sobre um imóvel, que precisará ser buscada no csv") 
+  precisa_de_notícias:bool = dspy.OutputField(desc="Define se o cliente mencionou/pediu um resumo de como é o bairro, como é morar em determinada região ou deseja informações sobre a vida cotidiana, características, serviços e outros aspectos relevantes")
+  precisa_de_classificação_mais_procurados:bool = dspy.OutputField(desc="Define se o cliente menciou/pediu quais foram os filtros mais usados ou quais foram os critérios mais procurados")
+
+class ExtrairFiltros(dspy.Signature):
+  """Extrai filtros de busca de imóveis a partir do pedido do usuário.
+  
+    REGRAS:
+      - Não usar variáveis None
+      - Não usar 'float('inf')' nos valores desejados
+  """
+  texto_usuario: str = dspy.InputField()
+  tipos_de_filtro: list[TiposFiltro] = dspy.OutputField(desc="Lista com os tipos de filtragem/colunas do CSV,sendo 'Área' a área últil construida do apartamento")
+  valor_desejado: dict[TiposFiltro,list] = dspy.OutputField(desc="Valores desejados do cliente com base nos tipos de filtro, se tiver apenas um valor, é um intervalo de 0 até o valor pedido. Se tiver mais de uma variável é um intervalo que engloba esses valores. Nunca usar 'None' ou 'float('inf')' nos valores desejados")
+
+# Adicionado: assinatura DSPy usada exclusivamente para criar a mensagem do /start.
+# Ela separa as informações fornecidas pelo código da redação produzida pela IA.
+class BoasVindasAssistente(dspy.Signature):
+  """Gera uma saudação variada, mas limitada às funcionalidades reais do bot."""
+  #a IA recebe uma lista autorizada e deve limitar a apresentação a esses filtros.
+  filtros_disponiveis: list[str] = dspy.InputField(
+      desc="Lista fechada de filtros realmente disponíveis no código. Não invente outros."
+  )
+  #define o objetivo geral do bot para evitar promessas de funcionalidades inexistentes.
+  funcionalidades: str = dspy.InputField(
+      desc="Texte que contem as funcionalidades e como ativar cada uma delas."
+  )
+  #este é o texto final que o Handler enviará ao usuário no Telegram.
+  mensagem_boas_vindas: str = dspy.OutputField(
+      desc="Saudação breve em português brasileiro, explicando como começar uma pesquisa."
+  )
+
+class FiltrosDoCSV(dspy.Signature):
+  '''Acha apartamentos no CSV que se encaixem na mensagem do cliente.'''
+  df_bruto = dspy.InputField(desc="Dataframe completo dos apartamentos")
+  tipos_de_filtro: list[TiposFiltro] = dspy.InputField(desc="Lista com os tipos de filtragem/colunas do CSV, sendo 'Área' a área útil construída do apartamento")
+  valor_desejado: dict[TiposFiltro,list] = dspy.InputField(desc="Valores inteiros desejados do cliente com base nos tipos de filtro, se tiver apenas um valor, é um intervalo de 0 até o valor pedido. Se tiver mais de uma variável, é um intervalo entre esses valores. Nunca usar 'None' ou 'float('inf')' nos valores desejados")
+  lista_apartamentos_str:list = dspy.OutputField(desc="Lista dos apartamentos achados pelo filtro em formato de string")
+
+class PesquisarNoticias(dspy.Signature):
+  """Você é um pesquisador de notícias. Identifique o tema do pedido (provavelmente um bairro da Cidade de São paulo), use a
+  ferramenta pesquisar_noticias e responda em português com um resumo positivo curto do conjunto de notícias, mantendo os links."""
+
+  endereço_pedido: str = dspy.InputField(desc="Pedido do usuário sobre um bairro, ex.: 'como é viver sobre o Vila Mariana'")
+  resumo_positivo: str = dspy.OutputField(desc="Resumo Positivo, com uma abordagem leve e informativa, das notícias encontradas")
+
+# Qwen redige mensagens naturais para a navegação. As contagens são
+# calculadas pelo Python e fornecidas ao modelo para evitar números inventados.
+class MensagemInteracao(dspy.Signature):
+  """Escreve uma mensagem curta, natural e cordial para o cliente da imobiliária."""
+  objetivo: str = dspy.InputField(desc="O que a mensagem precisa comunicar")
+  total_encontrado: int = dspy.InputField(desc="Total de imóveis na busca atual")
+  apresentados_nesta_resposta: int = dspy.InputField(desc="Quantidade apresentada nesta resposta")
+  restantes: int = dspy.InputField(desc="Quantidade ainda não apresentada")
+  mensagem: str = dspy.OutputField(desc="Mensagem em português brasileiro; não invente números")
+
+
+#Lista de feramentas/funções para serem usadas pelos sub-modulos
+
+def mandar_mensagem_pelo_telegram(mensagem_text:str,chat_id_telegram:str|int):
+  '''Manda mensagem para o cliente,identificado pelo chat_id, atraves do telegram'''
+  bot.send_message(chat_id = chat_id_telegram,text=mensagem_text)
+  return f"Mensagem dizendo: '{mensagem_text}' foi enviada para o cliente "
+
+def pesquisar_noticias(localidade_extraída_do_pedido:str):
+  try:
+    # Parte Relacionada a função output das notícias (US1 - B)
+    results = DDGS().news(query=f"notícias positivas sobre o bairro {localidade_extraída_do_pedido} na Cidade de São Paulo (capital)", max_results=5)
+
+    texto_formatado = ""
+
+    for i, noticia in enumerate(results, 1):
+      texto_formatado += f"Notícia {i}:\n"
+      texto_formatado += f"Título: {noticia.get('title')}\n"
+      texto_formatado += f"Data: {noticia.get('date')}\n"
+      texto_formatado += f"Fonte: {noticia.get('source')}\n"
+      texto_formatado += f"Link: {noticia.get('url')}\n"
+      texto_formatado += f"Resumo: {noticia.get('body')}\n"
+      texto_formatado += "-" * 40 + "\n"
+
+    if not texto_formatado:
+      texto_formatado = f"Nenhuma notícia encontrada para: {localidade_extraída_do_pedido}"
+
+    # Exibe o texto final no console e envia para o chat
+    print(texto_formatado)
+
+    return texto_formatado
+  except Exception as e:
+    print(f"Erro ao buscar notícias: {e}")
+    return "Desculpe, ocorreu um erro ao buscar as notícias."
+
+
+def montar_mini_apresentação_e_mandar_pelo_telegram(
+    fotos: str,
+    num_banheiros:int, 
+    num_quartos:int, 
+    num_estacionamento:int, 
+    área:int, 
+    valor:int, 
+    chat_id_telegram):
+  
+  '''Monta e Envia a apresentação do apartamento para o cliente dentro do telegram'''
+  
+  bot.send_message_draft(chat_id_telegram,20,"")
+
+  modelo_layout = f'''
+  <tg-slideshow>
+
+  ![](https://raw.githubusercontent.com/Grupo-RibBIT/arquivo-base/refs/heads/main/fotos_exemplo_apt/{fotos}-1.jpg)
+  ![](https://raw.githubusercontent.com/Grupo-RibBIT/arquivo-base/refs/heads/main/fotos_exemplo_apt/{fotos}-2.jpg)
+  ![](https://raw.githubusercontent.com/Grupo-RibBIT/arquivo-base/refs/heads/main/fotos_exemplo_apt/{fotos}-3.jpg)
+
+  </tg-slidehow>
+
+  #Apartamento ID563595
+  ######Valor de Compra: ==R${valor}==
+
+  | Infos do Apartamento | |
+  |:---------|:--------:|
+  | Área Útil| {área} m² |
+  | Quartos | {num_quartos} (1 suíte) |
+  | Banheiros | {num_banheiros} |
+  | Vagas de Estacionamento | {num_estacionamento} |
+
+  ###Destaques:
+  - Tem piscina
+  >**Para mais informações**: [Site da Imobiliária](https://github.com/Grupo-RibBIT)
+  '''
+
+  apresentação = telebot.types.InputRichMessage(markdown=modelo_layout)
+
+  bot.send_rich_message(chat_id_telegram,apresentação)
+  return "Apresentação enviada com sucesso"
+
+def enviar_localizacao_no_telegram(endereço_apartamento, chat_id_telegram):
+  '''Peqsuisa o endereço_apartamento no OpenStreetMaps e usa as coordenadas para enviar a localização no telegram'''
+  endereco = geolocator.geocode(endereço_apartamento)
+  print('Geocode: ', endereco)
+  if endereco:
+      def send_coords():
+          bot.send_message(chat_id=chat_id_telegram, text='Localização aproximada: ')
+          bot.send_location(
+              chat_id=chat_id_telegram,
+              latitude=endereco.latitude,
+              longitude=endereco.longitude)
+          return 'Enviado.'
+      print('Endereco: ', endereco.address)
+      print('Latitude: ', endereco.latitude)
+      print('Longitude: ', endereco.longitude)
+  else:
+      return 'Endereço nao encontrado, encerre a pesquisa e peça para o usuario colocar um endereço válido' 
+  return send_coords()
+
+
+#Filtros Csv
+def filtrar_csv(tipo_de_filtragem,df_bruto,valores_desejados:dict[TiposFiltro,list]):
+  '''Filtra o DataFrame pelo tipo de filtragem escolhido determinado valor/intervalo de valores desejado pelo cliente'''
+  df = df_bruto
+  print("Vai filtrar usando: ",tipo_de_filtragem)
+  for tipo in tipo_de_filtragem:
+    print("Pegou o filtro atual: ",tipo)
+    df = df.dropna(subset=[tipo])
+    print("Os valores desejados são: ",valores_desejados)
+    valores_desejado_atual= valores_desejados[tipo]
+
+    #NOVO: correção dos filtros para não ter valores nulos ou infinitos, ou apenas o valor 0
+    
+    if 'None' in valores_desejado_atual:
+       valores_desejado_atual.remove('None')
+                
+    if "float('inf')" in valores_desejado_atual:
+       valores_desejado_atual.remove("float('inf')")
+       
+    if valores_desejado_atual == [0] or valores_desejado_atual == ['0']:
+       continue
+    
+    if tipo == "Área":
+       
+       if len(valores_desejado_atual) >= 2:
+          v_min, v_max = min(valores_desejado_atual[0], valores_desejado_atual[1]), max(valores_desejado_atual[0], valores_desejado_atual[1])
+       else:
+          v_min, v_max = 0, max(valores_desejado_atual)
+          df = df[
+              (df[tipo] >= v_min) & (df[tipo] <= v_max)
+          ]
+    if tipo == "Endereço":
+      df = df[
+          df[tipo]
+          .astype(str)
+          .str.contains(valores_desejado_atual[0], case=False, na=False)
+      ]
+    elif tipo == "preço_num":
+      if len(valores_desejado_atual) >= 2:
+          v_min, v_max = min(valores_desejado_atual[0], valores_desejado_atual[1]), max(
+              valores_desejado_atual[0], valores_desejado_atual[1]
+          )
+          df = df[
+              (df[tipo] >= v_min) & (df[tipo] <= v_max)
+          ]
+      else:
+          v_min, v_max = 0, max(
+              valores_desejado_atual
+          )
+          df = df[
+              (df[tipo] >= v_min) & (df[tipo] <= v_max)
+          ]
+    else:
+      if len(valores_desejado_atual) >= 2:
+                v_min, v_max = min(valores_desejado_atual[0], valores_desejado_atual[1]), max(
+                    valores_desejado_atual[0], valores_desejado_atual[1]
+                )
+                df = df[
+                    (df[tipo] >= v_min) & (df[tipo] <= v_max)
+                ]
+      else:
+          df = df[df[tipo] == valores_desejado_atual[0]]
+
+  if not df.empty:
+    print(f"[Filtro CSV] {df.shape[0]} imóveis retornados.")
+  else:
+    print("[Filtro CSV] Nenhum imóvel encontrado para estes critérios.")
+
+  return df
+
+
+
+#Lista de ferramentas para o Gerenciador
+ferramentas_dos_modulos = [mandar_mensagem_pelo_telegram, 
+                           montar_mini_apresentação_e_mandar_pelo_telegram, 
+                           enviar_localizacao_no_telegram, 
+                           mandar_mensagem_pelo_telegram, 
+                           filtrar_csv,
+                           pesquisar_noticias,
+                           ]
+
+# ADICIONADO: aplica filtros adicionais à seleção atual sem tocar no DataFrame original.
+# Para campos de contagem (quartos, banheiros e vagas), um único valor é tratado como
+# correspondência exata; para preço, área e endereço, preserva-se a regra já existente.
+def aplicar_filtros_adicionais(df_atual, tipos_de_filtro, valores_desejados):
+  df_refinado = df_atual.copy()
+  campos_contagem = {"Quartos", "Banheiros", "Vagas_de_estacionamento"}
+  for tipo in tipos_de_filtro:
+    valores = valores_desejados[tipo]
+    if tipo in campos_contagem and len(valores) == 1:
+      df_refinado = df_refinado.dropna(subset=[tipo])
+      df_refinado = df_refinado[df_refinado[tipo] == valores[0]]
+    else:
+      # Reutiliza o filtro original para intervalos, preço, área e endereço.
+      df_refinado = filtrar_csv([tipo], df_refinado, {tipo: valores})
+  return df_refinado
+
+
+# ADICIONADO: guarda a pesquisa ativa e o progresso da paginação de cada chat.
+# O DataFrame original permanece intacto; cada estado guarda apenas o resultado da busca.
+estados_pesquisa = {}
+
+# ADICIONADO: limite centralizado para facilitar a alteração futura da quantidade por resposta.
+IMOVEIS_POR_RESPOSTA = 3
+
+#Criação do Modulo Geral
+
+class BotImobiliária(dspy.Module):
+  def __init__(self,dataframe):
+    super().__init__()
+
+    self.dataframe = dataframe
+
+    #Definindo os sub-modulos
+
+    self.gerenciador = dspy.ChainOfThought(EscolhasGerenciador)
+
+    self.atendente = dspy.ChainOfThought(EscolhasAtendente)
+
+    self.extrator = dspy.ChainOfThought(ExtrairFiltros)
+
+    self.arquiteto = dspy.ChainOfThought(DescriçãoApartamento)
+
+    self.pesquisador = dspy.ReAct(PesquisarNoticias, tools=[pesquisar_noticias])
+
+    self.apresentador = dspy.ReAct(CaracterísticasApresentação, tools=[montar_mini_apresentação_e_mandar_pelo_telegram])
+
+    self.navegador = dspy.ReAct("endereço_apartamento, chat_id_telegram -> localização", tools=[enviar_localizacao_no_telegram], max_iters=1)
+
+    self.finalizador = dspy.ReAct("resultado_do_pensamento -> resposta_final_cliente",tools=[])
+
+    # ADICIONADO: módulo de linguagem usado para redigir mensagens de navegação.
+    self.mensageiro = dspy.Predict(MensagemInteracao)
+
+  # ADICIONADO: apresenta até três imóveis da pesquisa guardada, sem refazer a busca.
+  def apresentar_lote(self, chat_id_telegram, estado, precisa_de_localizacao=False):
+    print("Começando a apresentação dos lotes...")
+    resultados = estado["resultados"]
+    total = len(resultados)
+    inicio_lote = estado["proximo_indice"]
+    fim_lote = min(inicio_lote + IMOVEIS_POR_RESPOSTA, total)
+    lote = resultados.iloc[inicio_lote:fim_lote]
+    quantidade_apresentada = len(lote)
+
+    # ADICIONADO: avança o índice para a próxima página antes de enviar as apresentações.
+    estado["proximo_indice"] = fim_lote
+
+    # ADICIONADO: reaproveita o arquiteto e o apresentador existentes para cada imóvel do lote.
+    # ALTERADO: identifica a linha do apartamento e suas informações
+    for indice, linha in lote.iterrows():
+      linha_achada = linha.to_frame().T.to_csv(index=False)
+      caracteristicas = self.arquiteto(linha_do_csv=linha_achada)
+      print(caracteristicas)
+      foto_escolhida = random.randint(0, len(list_fotos_apt) - 1)
+      slides = list_fotos_apt[foto_escolhida]
+      montar_mini_apresentação_e_mandar_pelo_telegram(
+        fotos=slides,
+        num_banheiros=caracteristicas.banheiros,
+        num_quartos=caracteristicas.quartos,
+        área=caracteristicas.área,
+        valor=caracteristicas.valor,
+        num_estacionamento=caracteristicas.estacionamento,
+        chat_id_telegram=chat_id_telegram
+      )
+
+      #ADICIONADO: Guarda os dados do imóvel usando seu índice como identificador.
+      if "imoveis_selecionaveis" not in estado:
+         estado["imoveis_selecionaveis"] = {}
+
+      chave_imovel = str(indice)
+
+      estado["imoveis_selecionaveis"][chave_imovel] = linha.to_dict()
+
+      # ADICIONADO: Cria um teclado exclusivo para este apartamento.
+      teclado_imovel = telebot.types.InlineKeyboardMarkup()
+
+      botão_selecionar = telebot.types.InlineKeyboardButton(
+         "Quero esse imóvel!",
+         callback_data=f"imob_escolher_{chave_imovel}"
+      )
+
+      teclado_imovel.add(botão_selecionar)
+
+      # Envia o botão logo após a apresentação do apartamento.
+      bot.send_message(
+         chat_id = chat_id_telegram,
+         text="Selecionar imóvel:",
+         reply_markup=teclado_imovel
+      )
+
+      # ALTERADO: a localização Geopy faz parte da apresentação de CADA imóvel.
+      # A ordem é: apresentar o imóvel atual, enviar sua localização e só então
+      # passar ao próximo imóvel do lote. A chamada direta garante que a função
+      # que usa o Geopy seja executada, sem depender do agente ReAct decidir usá-la.
+      try:
+        enviar_localizacao_no_telegram(
+          endereço_apartamento=caracteristicas.endereço_apartamento,
+          chat_id_telegram=chat_id_telegram
+        )
+      except Exception as erro_localizacao:
+        # ALTERADO: uma falha de geocodificação não deve impedir os próximos imóveis.
+        print(f"Erro ao enviar localização do imóvel: {erro_localizacao}")
+        bot.send_message(
+          chat_id_telegram,
+          "Não consegui localizar este endereço no mapa, mas vou continuar com os próximos imóveis."
+        )
+
+    # ADICIONADO: Python calcula os números; o modelo apenas os transforma em uma mensagem natural.
+    restantes = max(total - fim_lote, 0)
+    if total == 0:
+      objetivo = "Informe naturalmente que nenhum imóvel corresponde aos critérios atuais e sugira ajustar filtros ou iniciar nova pesquisa."
+    elif restantes > 0:
+      objetivo = f"Informe exatamente estes números, sem alterá-los: total encontrado={total}; apresentados nesta resposta={quantidade_apresentada}; ainda não apresentados={restantes}. Explique isso naturalmente e convide o cliente a escolher um dos botões."
+    else:
+      objetivo = f"Informe exatamente estes números, sem alterá-los: total encontrado={total}; apresentados nesta resposta={quantidade_apresentada}; ainda não apresentados={restantes}. Avise que não há mais imóveis para mostrar e sugira ajustar filtros ou iniciar nova pesquisa."
+
+    texto_resultados = self.mensageiro(
+      objetivo=objetivo,
+      total_encontrado=total,
+      apresentados_nesta_resposta=quantidade_apresentada,
+      restantes=restantes
+    ).mensagem
+
+    # ADICIONADO: os três botões permanecem disponíveis após cada lote, conforme solicitado.
+    # Se não houver mais imóveis, o callback de "Mostrar Próximos" informa que a lista terminou.
+    teclado = telebot.types.InlineKeyboardMarkup(row_width=1)
+    teclado.add(
+      telebot.types.InlineKeyboardButton("Acrescentar Filtro", callback_data="imob_filtro"),
+      telebot.types.InlineKeyboardButton("Mostrar Próximos", callback_data="imob_proximos"),
+      telebot.types.InlineKeyboardButton("Nova Pesquisa", callback_data="imob_nova")
+    )
+    bot.send_message(chat_id_telegram, texto_resultados, reply_markup=teclado)
+
+  #A função foward diz como o modulo geral vai funcionar
+
+  def forward(self, mensagem) -> dspy.Prediction:
+    global está_rodando
+    está_rodando = True
+
+    inicio = time.time()
+    resposta_inicial = self.atendente(mensagem_do_cliente=mensagem.text,chat_id_telegram=mensagem.chat.id)
+    fim = time.time()
+    print(f"Resposta Atendente obtida em {fim - inicio:.2f} segundos")
+    print(resposta_inicial)
+
+    inicio = time.time()
+    escopo_do_pedido = self.gerenciador(analisar_escopo = resposta_inicial.desejo_do_cliente, lista_de_ferramentas=ferramentas_dos_modulos)
+    fim = time.time()
+    print(f"Escopo obtido em {fim - inicio:.2f} segundos")
+    print('Escopo Pedido:', escopo_do_pedido)
+
+    linha_de_pensamento = f'''
+          ##Resposta Momentânea
+            {resposta_inicial}
+          ##Escopo Definido
+            {escopo_do_pedido}
+          
+          '''
+
+    if escopo_do_pedido.precisa_de_busca_no_csv == True and not (escopo_do_pedido.precisa_de_notícias == True or escopo_do_pedido.precisa_de_classificação_mais_procurados == True):
+        inicio = time.time()
+        filtros_de_pesquisa = self.extrator(texto_usuario=(mensagem.text + ""))
+        fim = time.time()
+        print(f"Filtros obtidos em {fim - inicio:.2f} segundos")
+        print(filtros_de_pesquisa)
+
+        usando_json.registrar_filtros_no_ranking(filtros_de_pesquisa.tipos_de_filtro)
+
+        todos_os_filtros = ["preço_num","Área","Endereço","Quartos","Banheiros","Vagas_de_estacionamento"]
+        filtros_não_usados = [filtro for filtro in todos_os_filtros if filtro not in filtros_de_pesquisa.tipos_de_filtro]
+        print("Filtros que não foram usados: ", filtros_não_usados) 
+
+        inicio = time.time()
+        apartamentos_achados = filtrar_csv(tipo_de_filtragem=filtros_de_pesquisa.tipos_de_filtro,valores_desejados=filtros_de_pesquisa.valor_desejado,df_bruto=self.dataframe)
+        fim = time.time()
+        print(f"Apartamentos obtidos em {fim - inicio:.2f} segundos")
+        print(apartamentos_achados)
+
+        print(f"Foram achados {apartamentos_achados.shape[0]} apartamentos com essa busca")
+        
+        if apartamentos_achados.shape[0] > 30:
+          bot.send_message(mensagem.chat.id,f"Foram encontrados muitos ({apartamentos_achados.shape[0]}) apartamentos com as características que você procura, precisamos de informações extras para sermos mais precisos!")
+          bot.send_message(mensagem.chat.id,f"Você tem preferência sobre {", ".join(filtros_não_usados)}?")
+          return
+
+
+        # ADICIONADO: guarda o resultado completo para paginação e filtros adicionais.
+        # A cópia evita que alterações na pesquisa atual modifiquem o DataFrame original.
+        estado = {
+        "resultados": apartamentos_achados.copy(),
+        "proximo_indice": 0,
+        "filtros": list(filtros_de_pesquisa.tipos_de_filtro),
+        "valores_filtros": dict(filtros_de_pesquisa.valor_desejado),
+        "precisa_de_localizacao": bool(escopo_do_pedido.precisa_de_localizacao),
+        "aguardando_filtro": False,
+        "aguardando_nova_pesquisa": False
+        }
+
+        # print("Estado atual: ", estado)
+        
+        estados_pesquisa[mensagem.chat.id] = estado
+    
+        # ADICIONADO: a primeira resposta apresenta somente três imóveis.
+        self.apresentar_lote(mensagem.chat.id, estado, estado["precisa_de_localizacao"])
+        está_rodando = False
+        return dspy.Prediction("Busca realizada e primeiro lote apresentado.")
+
+    if escopo_do_pedido.precisa_de_notícias == True:
+      inicio = time.time()
+      resumo = self.pesquisador(endereço_pedido=mensagem.text)
+      fim = time.time()
+      print(f"Filtros obtidos em {fim - inicio:.2f} segundos")
+      print('Resumo das Notícias: ', resumo)
+
+      bot.send_message(mensagem.chat.id,resumo.resumo_positivo)
+
+    if escopo_do_pedido.precisa_de_classificação_mais_procurados == True:
+      classificação = usando_json.ler_top_filtros()
+
+      texto_classificação = f"As pessoas estão levando mais em consideração quando procuram apartamentos os seguintes pontos: \n"
+
+      for filtro_valor in classificação["filtros"]:
+        texto_classificação += f" - {filtro_valor["filtro"]}: {filtro_valor["pesquisas"]}\n"
+
+      bot.send_message(mensagem.chat.id, texto_classificação)
+            
+    # Comportamento anterior mantido para mensagens que não iniciam uma busca no CSV.
+    linha_de_pensamento = f"""
+      ##Resposta Momentânea
+      {resposta_inicial}
+      ##Escopo Definido
+      {escopo_do_pedido}
+    """
+
+
+    print(linha_de_pensamento)
+
+    final = self.finalizador(resultado_do_pensamento=linha_de_pensamento).resposta_final_cliente
+    
+    está_rodando = False
+    return dspy.Prediction(final)
+
+#Criando uma instância do modulo geral
+bot_recepção = BotImobiliária(dataframe=df)
+
+def processar_mensagem(message):
+   try:
+      print(f"Mensagem encaminhada para o DSPy!")
+      print(f"Mensagem recebida: {message.text}")
+
+      if not está_rodando:
+        print("Inciando o bot...")
+        usando_json.salvar_mensagem_no_histórico(message.chat.id,message.text)
+        #Usando a instância com a mensagem que o cliente mandar
+        resultado_interação = bot_recepção(mensagem=message)
+      else:
+        print("Reiniciando o bot...")
+        message.text = usando_json.ler_histórico_json(message.chat.id)[-1] + ", e quero também com " + message.text
+        usando_json.salvar_mensagem_no_histórico(message.chat.id,message.text)
+        #Usando a instância com a mensagem que o cliente mandar
+        resultado_interação = bot_recepção(mensagem=message)
+
+      print(f"DSPY terminou o processamento!")
+
+   except Exception as e:
+        print(f"[Erro] {e}")
+        bot.send_message(message.chat.id, f"❌ Erro ao processar a mensagem: {str(e)}")
+
+def transcrever_audio_whisper(caminho_arquivo: str) -> str:
+    """Padroniza o áudio em memória (16kHz Mono PCM 16-bit) e realiza a transcrição
+       otimizada usando o modelo Whisper."""
+    
+    # Carrega o arquivo de áudio (.ogg / .wav) e padroniza para o formato ideal para o whisper
+    audio = AudioSegment.from_file(caminho_arquivo)
+    audio = audio.set_frame_rate(16000).set_channels(1).set_sample_width(2)
+
+    ''' Converte os bytes bruto em array NumPy float32 normalizado em ponto flutuante(-1.0 a 1.0) 
+        evitando explosão de gradiente, portanto perda de sentido'''
+    raw_data = audio.raw_data
+    audio_np = (
+        np.frombuffer(raw_data, dtype=np.int16).astype(np.float32) / 32768.0
+    )
+
+    # Transcreve com o Whisper
+    resultado = modelo_whisper.transcribe(
+        audio_np, language="pt", fp16=False  # fp16=False garante compatibilidade com CPU
+    )
+
+    # Retorna o texto limpo
+    return resultado.get("text", "").strip()
+
+
+#NOVO: lista central dos filtros que a saudação está autorizada a mencionar.
+# Importante: manter esta lista sincronizada com os filtros realmente aceitos pelo código.
+FILTROS_DISPONIVEIS_START = [
+    "Preço",
+    "Área útil",
+    "Endereço",
+    "Quartos",
+    "Banheiros",
+    "Vagas de estacionamento",
+]
+
+
+# Cria o preditor da saudação separado dos preditores usados para pesquisar imóveis.
+# Assim, o /start não precisa chamar nem modificar o fluxo de pesquisa.
+boas_vindas_ia = dspy.Predict(BoasVindasAssistente)
+
+
+# NOVO: Handler independente para o comando /start do Telegram.
+# Ele só recebe o usuário e apresenta as funcionalidades; não pesquisa nem filtra imóveis.
+# Deve ficar antes do Handler genérico abaixo, para que /start não caia no fluxo normal.
+@bot.message_handler(commands=["start"])
+def iniciar_conversa(message):
+  texto = (
+          "Olá! Bem-vindo ao Assistente Imobiliário! 🏡\n\n"
+          "Posso ajudar em: \n "
+          " - Pesquisa de apartamentos\n"
+          "   Ex: 'Quero ver apartamentos no Butantã por até 1 milhão'.\n\n"
+          " - Carcterísticas mais procuradas nos apartamentos\n"
+          "   Ex: 'Quais os filtros mais pesquisados?'.\n\n"
+          " - Como é morar em determinado bairro em São Paulo\n"
+          "   Ex: 'Como é morar na Vila Mariana ?'.\n\n"
+          "Vamos lá !!!"
+      )
+
+  # NOVO: envia a saudação ao mesmo chat que executou o comando /start.
+  bot.send_message(message.chat.id, texto)
+
+@bot.message_handler(commands=["historico"])
+def mostrar_historico(message):
+    id_cliente = str(message.from_user.id)
+
+    texto = usando_json.exibir_historico(id_cliente)
+
+    bot.reply_to(message, texto)
+
+# ADICIONADO: callbacks dos botões inline de navegação dos resultados.
+@bot.callback_query_handler(func=lambda call: call.data in {"imob_filtro", "imob_proximos", "imob_nova"})
+def tratar_botoes_resultados(call):
+  chat_id = call.message.chat.id
+
+  # ALTERADO: tenta confirmar o clique imediatamente, antes de qualquer operação
+  # que possa demorar (IA, filtros ou geocodificação). Um callback pode já ter
+  # expirado quando o Telegram o entrega; nesse caso, registramos o erro e seguimos.
+  try:
+    bot.answer_callback_query(call.id)
+  except Exception as erro_callback:
+    print(f"Aviso ao confirmar clique do botão: {erro_callback}")
+
+  # ADICIONADO: remove os três botões da mensagem clicada para evitar teclados antigos.
+  # A remoção é independente da ação escolhida e não apaga a mensagem nem os imóveis.
+  try:
+    bot.edit_message_reply_markup(
+      chat_id=chat_id,
+      message_id=call.message.message_id,
+      reply_markup=None
+    )
+  except Exception as erro_teclado:
+    # Se a mensagem já não tiver teclado ou não puder ser editada, a ação ainda continua.
+    print(f"Aviso ao remover teclado inline: {erro_teclado}")
+
+  estado = estados_pesquisa.get(chat_id)
+
+  if call.data == "imob_proximos":
+    # ADICIONADO: apresenta o próximo lote da mesma pesquisa, sem reler ou refiltrar o CSV.
+    if not estado:
+      bot.send_message(chat_id, "Não encontrei uma busca ativa. Envie sua pesquisa para começarmos.")
+      return
+    if estado["proximo_indice"] >= len(estado["resultados"]):
+      bot.send_message(chat_id, "Você já viu todos os imóveis encontrados. Se quiser, pode iniciar uma nova pesquisa.")
+      return
+    bot_recepção.apresentar_lote(chat_id, estado, estado["precisa_de_localizacao"])
+    return
+
+  if call.data == "imob_filtro":
+    # ADICIONADO: a próxima mensagem de texto será interpretada como filtro para a busca atual.
+    if not estado:
+      bot.send_message(chat_id, "Ainda não há uma busca ativa. Envie primeiro os critérios dos imóveis que procura.")
+      return
+    estado["aguardando_filtro"] = True
+    estado["aguardando_nova_pesquisa"] = False
+    mensagem = bot_recepção.mensageiro(
+      objetivo="Pergunte de forma natural e cordial qual filtro o cliente quer acrescentar para refinar a busca atual. Não diga que o filtro já foi aplicado.",
+      total_encontrado=len(estado["resultados"]),
+      apresentados_nesta_resposta=0,
+      restantes=max(len(estado["resultados"]) - estado["proximo_indice"], 0)
+    ).mensagem
+    bot.send_message(chat_id, mensagem)
+    return
+
+  if call.data == "imob_nova":
+    # ADICIONADO: limpa a pesquisa deste chat, preservando o DataFrame original carregado do CSV.
+    estados_pesquisa[chat_id] = {
+      "resultados": pd.DataFrame(),
+      "proximo_indice": 0,
+      "filtros": [],
+      "valores_filtros": {},
+      "precisa_de_localizacao": False,
+      "aguardando_filtro": False,
+      "aguardando_nova_pesquisa": True
+    }
+    mensagem = bot_recepção.mensageiro(
+      objetivo="Convide o cliente, de forma natural e cordial, a descrever o que deseja procurar na nova pesquisa, sabendo que essa não esta sendo a sua primeira busca.",
+      total_encontrado=0,
+      apresentados_nesta_resposta=0,
+      restantes=0
+    ).mensagem
+    bot.send_message(chat_id, mensagem)
+
+
+@bot.message_handler(content_types=['voice', 'audio'])
+def processar_audio(message):
+    chat_id = message.chat.id
+    temp_audio_path = f"temp_voice_{message.message_id}.ogg"
+
+    try:
+        bot.send_chat_action(chat_id, 'typing')
+        bot.send_message_draft(message.chat.id,20,'')
+
+        # Download do áudio enviado no Telegram
+        file_info = bot.get_file(message.voice.file_id if message.voice else message.audio.file_id)
+        downloaded_file = bot.download_file(file_info.file_path)
+
+        with open(temp_audio_path, 'wb') as new_file:
+            new_file.write(downloaded_file)
+
+        # Transcrição via Whisper
+        texto_transcrito = transcrever_audio_whisper(temp_audio_path)
+
+        if not texto_transcrito:
+            bot.send_message(chat_id, "⚠️ Não consegui entender o áudio.")
+            return
+
+        # Atribui o texto transcrito à mensagem
+        message.text = texto_transcrito
+
+        processar_mensagem(message)
+        
+        # Exibe a transcrição no terminal
+        print(f"[Transcrição] Texto: {texto_transcrito}")
+
+    except Exception as e:
+        print(f"[Erro no Áudio] {e}")
+        bot.send_message(chat_id, f"❌ Erro ao processar o áudio: {str(e)}")
+
+    finally:
+        # Exclusão do arquivo temporário
+        if os.path.exists(temp_audio_path):
+            os.remove(temp_audio_path)
+
+
+
+@bot.message_handler(func=lambda message: True)
+def reply_hi(message):
+  chat_id = message.chat.id
+  texto = message.text
+
+  print("Mensagem recebida!")
+
+  # ADICIONADO: filtros extras são aplicados somente aos resultados atuais, não ao DataFrame original.
+  estado = estados_pesquisa.get(message.chat.id)
+  if estado and estado.get("aguardando_filtro"):
+    estado["aguardando_filtro"] = False
+    try:
+      filtros_novos = bot_recepção.extrator(texto_usuario=message.text)
+
+      # NOVO: filtros acrescentados depois também entram no ranking
+      usando_json.registrar_filtros_no_ranking(filtros_novos.tipos_de_filtro)
+      # ADICIONADO: aplica cada critério ao conjunto já encontrado; por exemplo,
+      # "3 quartos" significa exatamente três quartos, não até três.
+      df_refinado = aplicar_filtros_adicionais(
+        df_atual=estado["resultados"],
+        tipos_de_filtro=filtros_novos.tipos_de_filtro,
+        valores_desejados=filtros_novos.valor_desejado
+      )
+      # ADICIONADO: substitui a seleção atual pelo subconjunto refinado e reinicia a paginação.
+      estado["resultados"] = df_refinado.copy()
+      estado["proximo_indice"] = 0
+      estado["filtros"].extend(filtros_novos.tipos_de_filtro)
+      estado["valores_filtros"].update(filtros_novos.valor_desejado)
+      bot_recepção.apresentar_lote(message.chat.id, estado, estado["precisa_de_localizacao"])
+    except Exception as erro:
+      # ADICIONADO: se a interpretação falhar, mantém os resultados e permite tentar novamente.
+      print(f"Erro ao aplicar filtro adicional: {erro}")
+      estado["aguardando_filtro"] = True
+      bot.send_message(message.chat.id, "Não consegui identificar esse filtro com segurança. Pode reformular o critério que deseja acrescentar?")
+    return
+  
+  # ADICIONADO: após Nova Pesquisa, a próxima mensagem inicia uma busca independente.
+  if estado and estado.get("aguardando_nova_pesquisa"):
+    estados_pesquisa.pop(message.chat.id, None)
+
+  # 1. Inicializa a lista do chat se não existir
+  if chat_id not in user_messages:
+      user_messages[chat_id] = []
+
+  # 2. Adiciona a nova mensagem à lista
+  user_messages[chat_id].append(texto)
+  print(f"Mensagem recebida e acumulada de {chat_id}: {texto}")
+
+  # 3. Se já houver um timer rodando para este chat, cancela-o (reseta o cronômetro)
+  if chat_id in timers:
+      timers[chat_id].cancel()
+
+  # 4. Cria um novo timer de 15 segundos. Se o usuário mandar outra mensagem antes disso,
+  # o timer anterior é cancelado e a contagem reinicia do zero.
+  timer = threading.Timer(TEMPO_ESPERA, processar_mensagens_acumuladas, args=(chat_id,))
+  timers[chat_id] = timer
+  timer.start()
+  
+
+bot.polling()
