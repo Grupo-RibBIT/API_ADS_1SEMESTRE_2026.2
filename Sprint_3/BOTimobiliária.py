@@ -17,11 +17,11 @@ from geopy.geocoders import Nominatim
 
 #Configuração do Bot/Telegram e do LLM
 
-API_TOKEN = 'YOUR_TOKEN'
+API_TOKEN = 'YOUR API TOKEN'
 bot = telebot.TeleBot(API_TOKEN)
 
 
-lm = dspy.LM('ollama_chat/qwen2.5-coder:7b', api_base='http://localhost:11434', api_key='ignored')
+lm = dspy.LM('openai/qwen2.5-coder:7b', api_base='http://localhost:11434/v1', api_key='ollama')
 dspy.configure(lm=lm)
 
 modelo_whisper = whisper.load_model("small")
@@ -32,7 +32,7 @@ geolocator = Nominatim(user_agent="Bottelegram")
 
 list_fotos_apt = ["kamen-nikolov-fin","maxim-dorokhov","valmik-shah"]
 
-path_csv = "PATH PARA O CSV"
+path_csv = "YOUR PATH CSV"
 
 TiposFiltro = Literal["preço_num","Área","Endereço","Quartos","Banheiros","Vagas_de_estacionamento"]
 
@@ -438,7 +438,8 @@ class BotImobiliária(dspy.Module):
     estado["proximo_indice"] = fim_lote
 
     # ADICIONADO: reaproveita o arquiteto e o apresentador existentes para cada imóvel do lote.
-    for _, linha in lote.iterrows():
+    # ALTERADO: identifica a linha do apartamento e suas informações
+    for indice, linha in lote.iterrows():
       linha_achada = linha.to_frame().T.to_csv(index=False)
       caracteristicas = self.arquiteto(linha_do_csv=linha_achada)
       print(caracteristicas)
@@ -452,6 +453,31 @@ class BotImobiliária(dspy.Module):
         valor=caracteristicas.valor,
         num_estacionamento=caracteristicas.estacionamento,
         chat_id_telegram=chat_id_telegram
+      )
+
+      #ADICIONADO: Guarda os dados do imóvel usando seu índice como identificador.
+      if "imoveis_selecionaveis" not in estado:
+         estado["imoveis_selecionaveis"] = {}
+
+      chave_imovel = str(indice)
+
+      estado["imoveis_selecionaveis"][chave_imovel] = linha.to_dict()
+
+      # ADICIONADO: Cria um teclado exclusivo para este apartamento.
+      teclado_imovel = telebot.types.InlineKeyboardMarkup()
+
+      botão_selecionar = telebot.types.InlineKeyboardButton(
+         "Quero esse imóvel!",
+         callback_data=f"imob_escolher_{chave_imovel}"
+      )
+
+      teclado_imovel.add(botão_selecionar)
+
+      # Envia o botão logo após a apresentação do apartamento.
+      bot.send_message(
+         chat_id = chat_id_telegram,
+         text="Selecionar imóvel:",
+         reply_markup=teclado_imovel
       )
 
       # ALTERADO: a localização Geopy faz parte da apresentação de CADA imóvel.
