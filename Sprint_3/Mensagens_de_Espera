@@ -14,7 +14,7 @@ import usando_json
 from ddgs import DDGS
 from geopy.geocoders import Nominatim
 
-API_TOKEN = '8358623404:AAFdCo7AE3tfkUVV5rqQGya72LW6FE_L_W8'
+API_TOKEN = 'SEU_TOKEN'
 bot = telebot.TeleBot(API_TOKEN)
 
 
