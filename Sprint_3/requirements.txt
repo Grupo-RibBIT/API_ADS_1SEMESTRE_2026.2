@@ -1,0 +1,8 @@
+dspy
+pyTelegramBotAPI
+pandas
+numpy
+openai-whisper
+pydub
+ddgs
+geopy
