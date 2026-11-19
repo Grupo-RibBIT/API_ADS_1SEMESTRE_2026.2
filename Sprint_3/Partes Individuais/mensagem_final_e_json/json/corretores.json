@@ -1,0 +1,64 @@
+{
+  "corretores": [
+    {
+      "id": 1,
+      "nome": "Ana Clara Souza",
+      "telefone": "+55 11 98765-4321",
+      "creci": "28491-F"
+    },
+    {
+      "id": 2,
+      "nome": "Beatriz Lima",
+      "telefone": "+55 11 97123-4567",
+      "creci": "34512-F"
+    },
+    {
+      "id": 3,
+      "nome": "Camila Mendes",
+      "telefone": "+55 21 99887-1234",
+      "creci": "41230-F"
+    },
+    {
+      "id": 4,
+      "nome": "Daniel Oliveira",
+      "telefone": "+55 11 96543-8910",
+      "creci": "19823-F"
+    },
+    {
+      "id": 5,
+      "nome": "Eduardo Santos",
+      "telefone": "+55 31 99123-5544",
+      "creci": "50123-F"
+    },
+    {
+      "id": 6,
+      "nome": "Fernanda Costa",
+      "telefone": "+55 41 98833-2211",
+      "creci": "22344-F"
+    },
+    {
+      "id": 7,
+      "nome": "Gabriela Rocha",
+      "telefone": "+55 11 97766-5544",
+      "creci": "39812-F"
+    },
+    {
+      "id": 8,
+      "nome": "Lucas Martins",
+      "telefone": "+55 21 98111-2233",
+      "creci": "45678-F"
+    },
+    {
+      "id": 9,
+      "nome": "Mariana Ribeiro",
+      "telefone": "+55 31 97333-4455",
+      "creci": "31245-F"
+    },
+    {
+      "id": 10,
+      "nome": "Rafael Almeida",
+      "telefone": "+55 11 99222-3344",
+      "creci": "18765-F"
+    }
+  ]
+}
