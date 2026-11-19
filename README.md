@@ -1,6 +1,6 @@
 # API 1º Semestre ADS - FATEC
 
-> Status do Projeto: Em progresso!
+> Status do Projeto: Concluído ✅
 
 # Imóveis SP - Chatbot Telegram
 
@@ -20,18 +20,18 @@
 <div align="center">
   
 ## 🎯Desafio <a id="desafio"></a>
-  
+
 </div>
 
-O desafio consiste em desenvolver uma solução que permita consultar rapidamente o imenso ecossistema do mercado imobiliário da cidade de São Paulo. Através de uma base CSV pré-existente contendo informações detalhadas sobre apartamentos à venda - **incluindo valores, localidades e características específicas dos imóveis** - compradores e vendedores devem ser capazes de encontrar um apartamento ideal com velocidade e eficiência.
+O desafio consiste em desenvolver uma solução inteligente e acessível que facilite a busca por imóveis no amplo mercado imobiliário da cidade de São Paulo. Através de uma base CSV pré-existente contendo informações detalhadas sobre apartamentos à venda - **incluindo valores, localidades, características específicas e informações das imobiliárias** - o sistema deve proporcionar consultas rápidas e personalizadas, permitindo que compradores encontrem imóveis de acordo com suas preferências. Além disso, o desafio contempla recursos de acessibilidade, análise de tendências do mercado, informações relevantes sobre as regiões e persistência de dados, possibilitando a continuidade das pesquisas e a conexão entre compradores e corretores para dar início ao processo de aquisição.
 
 <div align="center">
-  
+
 ## 🏅Solução <a id="solucao"></a>
-  
+
 </div>
 
-A solução consiste em um **chatbot para o Telegram integrado com uma Inteligência Artificial (IA) Local**. Utilizando técnicas de IA para buscar informações na base de dados imobiliária, o chatbot ajuda compradores a encontrar o imóvel ideal através de buscas refinadas, comandos de voz e insights de localização. Para os vendedores, o sistema fornece dados analíticos sobre as preferências do mercado e alertas de lacunas de informação na base de dados, potencializando a especulação e a assertividade imobiliária na região de SP.
+A solução consiste em um **chatbot para o Telegram integrado com uma Inteligência Artificial (IA) Local**, capaz de realizar buscas imobiliárias personalizadas através de mensagens de texto e comandos de voz. Utilizando técnicas de processamento de dados e IA, o chatbot apresenta imóveis com **características detalhadas, fotografias, links das imobiliárias e localização aproximada**, proporcionando uma experiência de pesquisa prática e intuitiva. O sistema também oferece análises das preferências dos usuários, identificando tendências do mercado imobiliário, além de fornecer notícias recentes sobre as regiões pesquisadas. Para garantir uma experiência contínua, cada comprador possui um identificador único, permitindo armazenar seu histórico e retomar pesquisas anteriores. Por fim, o chatbot possibilita a seleção de imóveis de interesse e o encaminhamento a um corretor, facilitando o agendamento de visitas e o início do processo de compra.
 
 <div align="center">
   
@@ -47,9 +47,8 @@ A solução consiste em um **chatbot para o Telegram integrado com uma Inteligê
 | 4 | Média | Como comprador, gostaria de me comunicar com o chatbot por áudio para ser acessível para um maior número de pessoas. | 40 | 2 | 100% |
 | 5 | Média | Como cliente, gostaria de saber quais são os requisitos mais procurados com base no histórico de pesquisas para saber as tendências do mercado atual. | 40 | 2 | 100% |
 | 6 | Média | Como cliente, gostaria de ter acesso a notícias positivas recentes relacionadas à região do imóvel para ter mais argumentos de venda. | 20 | 2 | 100% |
-| 7 | Baixa | Como Comprador ou Vendedor, gostaria de um ID de usuário, para que minhas buscas sejam salvas e eu consiga continuar as minhas pesquisas. | 60 | 3 | 0% |
-| 8 | Baixa | Como vendedor, gostaria de ser informado quando a ia não tiver as informações necessárias para que eu possa acrescentar no banco de dados. (ex: piscina no imóvel, quadra, condomínio, etc) | 36 | 3 | 0% |
-| 9 | Baixa | Como cliente, gostaria de ser reconhecido se sou comprador ou vendedor para ter recomendações que melhor atendam  minhas necessidades. | 45 | 3 | 0% |
+| 7 | Baixa | Como Comprador, gostaria de um ID de usuário, para que minhas buscas sejam salvas e eu consiga continuar as minhas pesquisas. | 30 | 3 | 100% |
+| 8 | Baixa | Como comprador, gostaria de escolher um imóvel e ser encaminhado a um corretor para finalizar minha pesquisa e dar inicio a compra/visita do imóvel | 20 | 3 | 100% |
 
 
 <div align="center">
@@ -112,9 +111,13 @@ A solução consiste em um **chatbot para o Telegram integrado com uma Inteligê
  <a href="https://openai.com/pt-BR/index/whisper/"><img src="https://img.shields.io/badge/Whisper-412991?style=for-the-badge&logo=openai&logoColor=white"/></a>
  <a href="https://www.openstreetmap.org/#map=5/-15.13/-53.19"><img src="https://img.shields.io/badge/OpenStreetMap-7EBC6F?style=for-the-badge&logo=openstreetmap&logoColor=white"/></a>
  <a href="https://geopy.readthedocs.io/en/stable/"><img src="https://img.shields.io/badge/GeoPy-4285F4?style=for-the-badge&logo=python&logoColor=white"/></a>
+ <a href="https://pypi.org/project/RapidFuzz/"><img src="https://img.shields.io/badge/RapidFuzz-6A5ACD?style=for-the-badge&logo=python&logoColor=white"/></a>
  
 
 </div>
+
+<div>
+
 
 <div align="center">
 
@@ -122,20 +125,124 @@ A solução consiste em um **chatbot para o Telegram integrado com uma Inteligê
 
 </div>
 
-#Manual em planejamento.
+### 🛠 Pré-requisitos
 
- 🛠 Pré-requisitos
+Para executar o projeto localmente, é necessário:
 
-- Acesso a internet
-- Baixar o aplicativo Telegram
-  
+- Acesso à internet.
+- [Python](https://www.python.org/downloads/) instalado.
+- [Telegram](https://telegram.org/) instalado ou acesso ao Telegram Web.
+- [Ollama](https://ollama.com/download) instalado.
+- [FFmpeg](https://ffmpeg.org/download.html) instalado para processamento de áudio.
+- Arquivo CSV contendo os dados dos imóveis.
+
+**Observação:** Durante a instalação do Python no Windows, habilite a opção `Add Python to PATH`. O FFmpeg também deve estar configurado no PATH do sistema.
+
 <div align="center">
-  
- ## Como Executar o Projeto
+
+## 🚀 Como Executar o Projeto
 
 </div>
 
-- Começar uma conversa com o [Bot Imobiliário](https://t.me/Niemeyer_bot)
+### 1. Baixar o Repositório
+
+Clone o repositório do GitHub ou baixe o projeto em formato ZIP e extraia os arquivos.
+
+Abra o terminal na pasta do projeto.
+
+### 2. Instalar as Dependências
+
+Com o Python instalado, execute o seguinte comando no terminal:
+
+```bash
+python -m pip install -r requirements.txt
+```
+
+Esse comando instalará automaticamente as bibliotecas Python necessárias para o funcionamento do chatbot.
+
+### 3. Configurar a Inteligência Artificial Local
+
+Baixe e instale o [Ollama](https://ollama.com/download).
+
+Após a instalação, abra o terminal e execute:
+
+```bash
+ollama pull qwen2.5-coder:7b
+```
+
+Esse comando realizará o download do modelo **Qwen 2.5 Coder 7B**, utilizado pelo chatbot para processamento de linguagem natural.
+
+O Ollama deverá permanecer em execução durante a utilização do bot.
+
+### 4. Criar um Bot no Telegram
+
+1. Abra o Telegram ou [Telegram Web](https://web.telegram.org/).
+2. Pesquise por **@BotFather**.
+3. Inicie uma conversa e envie o comando `/newbot`.
+4. Escolha um nome e um nome de usuário para o bot.
+5. Copie o token de autenticação fornecido pelo BotFather.
+
+No código Python do projeto, localize o campo:
+
+```python
+"YOUR TOKEN"
+```
+
+Substitua pelo token gerado pelo BotFather.
+
+**Importante:** Nunca compartilhe ou publique seu token de autenticação no GitHub.
+
+### 5. Configurar a Base de Dados
+
+O chatbot utiliza uma base de dados imobiliária em formato CSV, contendo informações sobre os apartamentos disponíveis.
+
+No código Python, localize o campo:
+
+```python
+"YOUR CSV PATH"
+```
+
+Substitua pelo caminho do arquivo CSV no seu computador.
+
+**Atenção:** O arquivo CSV deve respeitar a estrutura e os parâmetros de dados utilizados pelo chatbot, incluindo os nomes das colunas esperadas pelo sistema.
+
+### 6. Configurar o FFmpeg
+
+Baixe o [FFmpeg](https://ffmpeg.org/download.html) e configure sua pasta `bin` no PATH do Windows.
+
+Para verificar a instalação, execute:
+
+```bash
+ffmpeg -version
+```
+
+O FFmpeg é necessário para o processamento das mensagens de áudio recebidas pelo chatbot.
+
+### 7. Executar o Chatbot
+
+Com todas as dependências instaladas e configurações realizadas, abra o terminal na pasta do projeto e execute:
+
+```bash
+python NOME_DO_ARQUIVO.py
+```
+
+Substitua `NOME_DO_ARQUIVO.py` pelo nome do arquivo principal do chatbot.
+
+Após a inicialização, abra o Telegram, encontre o bot criado e envie:
+
+```text
+/start
+```
+
+O chatbot estará pronto para receber consultas imobiliárias.
+
+### 8. Utilizar o Bot Imobiliário
+
+Também é possível acessar o chatbot desenvolvido originalmente através do link:
+
+**[Bot Imobiliário no Telegram](https://t.me/Niemeyer_bot)**
+
+A disponibilidade do bot depende de sua execução no ambiente em que está hospedado.
 
 <div align="center">
   
