@@ -17,7 +17,7 @@ from geopy.geocoders import Nominatim
 
 #Configuração do Bot/Telegram e do LLM
 
-API_TOKEN = '8996078250:AAFCX-65MdBzOJXVFK8E6mdPj2tB_pxtzs8'
+API_TOKEN = 'YOUR API TOKEN'
 bot = telebot.TeleBot(API_TOKEN)
 
 
@@ -32,7 +32,7 @@ geolocator = Nominatim(user_agent="Bottelegram")
 
 list_fotos_apt = ["kamen-nikolov-fin","maxim-dorokhov","valmik-shah"]
 
-path_csv = r"API_ADS_1SEMESTRE_2026.2-main\API_ADS_1SEMESTRE_2026.2-main\Sprint_2\apartamentos_sp_estruturado.csv"
+path_csv = r"YOUR PATH CSV"
 
 TiposFiltro = Literal["preço_num","Área","Endereço","Quartos","Banheiros","Vagas_de_estacionamento"]
 
