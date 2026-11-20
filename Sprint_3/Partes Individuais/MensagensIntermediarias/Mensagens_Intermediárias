@@ -1,0 +1,46 @@
+import telebot
+import time
+
+
+# Substitua 'SEU_TOKEN_AQUI' pelo token gerado no BotFather
+TOKEN = "SEU_TOKEN"
+bot = telebot.TeleBot(TOKEN)
+
+
+# Parte do @bot.message_handler(commands=['start'])
+# Agora  parte de mensagens de espera
+
+@bot.message_handler(func=lambda message: True)
+
+def responder_qualquer_texto(message):
+
+       bot.reply_to(message,"Olá! Seja bem-vindo ao canal! Aqui você vai encontrar as melhores opções de imóveis para sua comodidade. Informe o que deseja buscar!")
+       time.sleep(5)
+       bot.reply_to(message, "Aguarde um momento, enquanto são feitas as pesquisas!")
+       time.sleep(5)
+       
+       # Condição while hipotética em que x é True. No entanto,
+       # no código do BotImobiliária, a condição está relacionada
+       # ao contador de tempo
+       
+       x = True
+       
+       while x == True:
+
+              bot.reply_to(message,"...")
+              time.sleep(5)
+              bot.reply_to(message,"Aguarde")
+              time.sleep(5)
+              bot.reply_to(message,"...")
+              time.sleep(5)
+              bot.reply_to(message,"Aproveite nossas ofertas")
+              time.sleep(5)
+              bot.reply_to(message,"...")
+              time.sleep(5)
+              bot.reply_to(message,"Só mais alguns instantes")
+              time.sleep(5)
+
+            
+# Inicia o loop de polling para escutar as mensagens
+print('Bot iniciado...')
+bot.polling()
