@@ -8,6 +8,7 @@ import time
 import threading
 from typing import Literal
 import os
+import re
 import html  # NOVO: escape seguro dos dados do CSV ao enviar HTML pelo Telegram
 import unicodedata  # NOVO: reconhece comandos escritos com ou sem acentos
 import numpy as np
@@ -124,24 +125,24 @@ class CaracterísticasApresentação(dspy.Signature):
   apresentação:str = dspy.OutputField(desc="Apresentação seguindo o modelo definido pela ferramenta 'montar_mini_apresentação'")
 
 class EscolhasAtendente(dspy.Signature):
-  '''Simula a resposta de um atendente de imobiliária que recebe a mensagem do cliente e extrai oque ele deseja'''
+  '''Simula a resposta de um atendente de imobiliária que recebe a mensagem do cliente e extrai o que ele deseja'''
   mensagem_do_cliente:str = dspy.InputField()
   chat_id_telegram = dspy.InputField(desc="Identificador do usuário que mandou a mensagem no telegram")
-  desejo_do_cliente:str = dspy.OutputField(desc="Oque o cliente quer com essa conversa, para ser usado internamente")
+  desejo_do_cliente:str = dspy.OutputField(desc="O que o cliente mencionou na mensagem")
 
 
 class EscolhasGerenciador(dspy.Signature):
   '''Analisa o desejo_do_cliente extraído pelo Atendente e classifica com Bool (True ou False) se a mensagem possui as palavras apresentação e/ou localização e/ou um imóvel
   REGRAS:
-    - Se o cliente "QUER UM APARTAMENTO" ele deseja também uma apresentação
+    - Se não há menção de localidade ou características do apartamento, precisa_de_busca_no_csv é False;
+    - Se precisa_de_apresentação for True, precisa_de_localização também é True. Se não, é False;
   '''
   analisar_escopo:str = dspy.InputField()
   lista_de_ferramentas:list = dspy.InputField(desc="Lista de ferramentas usadas pelos sub-modulos")
-  precisa_de_localizacao:bool = dspy.OutputField(desc="Define se o cliente mencionou/pediu localização de um imóvel, que precisará ser enviada")
-  precisa_de_apresentacao:bool = dspy.OutputField(desc="Define se o cliente mencionou/pediu a apresentação ou mini-apresentação de um imóvel, que precisará ser enviada")
-  precisa_de_busca_no_csv:bool = dspy.OutputField(desc="Define se o cliente mencionou/pediu um imóvel, uma rua, um bairro, ou uma informação sobre um imóvel, que precisará ser buscada no csv") 
+  precisa_de_busca_no_csv:bool = dspy.OutputField(desc="Define se a mensagem contém características para buscar apartamentos no CSV. Se não há menção de localidade ou características do apartamento, precisa_de_busca_no_csv é False") 
   precisa_de_notícias:bool = dspy.OutputField(desc="Define se o cliente mencionou/pediu um resumo de como é o bairro, como é morar em determinada região ou deseja informações sobre a vida cotidiana, características, serviços e outros aspectos relevantes")
   precisa_de_classificação_mais_procurados:bool = dspy.OutputField(desc="Define se o cliente menciou/pediu quais foram os filtros mais usados ou quais foram os critérios mais procurados")
+  especificacoes_para_busca:bool = dspy.OutputField(desc=f"A mensagem contém alguma característica de busca que se encaixe em {TiposFiltro}?")
 
 class ExtrairFiltros(dspy.Signature):
   """Extrai filtros de busca de imóveis a partir do pedido do usuário.
@@ -151,6 +152,7 @@ class ExtrairFiltros(dspy.Signature):
       - Não usar 'float('inf')' nos valores desejados
   """
   texto_usuario: str = dspy.InputField()
+  criterios_de_filtro:bool = dspy.OutputField(desc="Foi especificado algum filtro?")
   tipos_de_filtro: list[TiposFiltro] = dspy.OutputField(desc="Lista com os tipos de filtragem/colunas do CSV,sendo 'Área' a área últil construida do apartamento")
   valor_desejado: dict[TiposFiltro,list] = dspy.OutputField(desc="Valores desejados do cliente com base nos tipos de filtro, se tiver apenas um valor, é um intervalo de 0 até o valor pedido. Se tiver mais de uma variável é um intervalo que engloba esses valores. Nunca usar 'None' ou 'float('inf')' nos valores desejados")
 
@@ -563,6 +565,23 @@ class BotImobiliária(dspy.Module):
     print(f"Escopo obtido em {fim - inicio:.2f} segundos")
     print('Escopo Pedido:', escopo_do_pedido)
 
+    nada_pedido = not (
+        escopo_do_pedido.precisa_de_busca_no_csv
+        or escopo_do_pedido.precisa_de_notícias
+        or escopo_do_pedido.precisa_de_classificação_mais_procurados
+    )
+
+    if nada_pedido:
+      texto_resposta = self.mensageiro(
+        objetivo="Responda de forma cordial: se o cliente cumprimentou, cumprimente de volta. Depois diga que pode ajudar com pesquisa de apartamentos, características mais procuradas e como é morar em um bairro de São Paulo, e pergunte o que ele procura.",
+        total_encontrado=0,
+        apresentados_nesta_resposta=0,
+        restantes=0
+      ).mensagem
+      bot.send_message(mensagem.chat.id, texto_resposta)
+      está_rodando = False
+      return dspy.Prediction("Atendimento iniciado.")
+
     linha_de_pensamento = f'''
           ##Resposta Momentânea
             {resposta_inicial}
@@ -570,10 +589,19 @@ class BotImobiliária(dspy.Module):
             {escopo_do_pedido}
           
           '''
+    #if escopo_do_pedido.especificacoes_para_busca == False and escopo_do_pedido.precisa_de_busca_no_csv == True:
+      # bot.send_message(mensagem.chat.id,"Temos mais de 27 mil apartamentos! Você tem alguma preferência para começarmos a busca? \n Exemplos: Preço, Área, localização, quantidade de quartos...")
+       #return 
+
 
     if escopo_do_pedido.precisa_de_busca_no_csv == True and not (escopo_do_pedido.precisa_de_notícias == True or escopo_do_pedido.precisa_de_classificação_mais_procurados == True):
         inicio = time.time()
         filtros_de_pesquisa = self.extrator(texto_usuario=(mensagem.text + ""))
+
+        if filtros_de_pesquisa.criterios_de_filtro == False:
+           bot.send_message(mensagem.chat.id,"Temos mais de 27 mil apartamentos! Você tem alguma preferência para começarmos a busca? \n Exemplos: Preço, Área, localização, quantidade de quartos...")
+           return
+        
         fim = time.time()
         print(f"Filtros obtidos em {fim - inicio:.2f} segundos")
         print(filtros_de_pesquisa)
@@ -605,7 +633,6 @@ class BotImobiliária(dspy.Module):
         "proximo_indice": 0,
         "filtros": list(filtros_de_pesquisa.tipos_de_filtro),
         "valores_filtros": dict(filtros_de_pesquisa.valor_desejado),
-        "precisa_de_localizacao": bool(escopo_do_pedido.precisa_de_localizacao),
         "aguardando_filtro": False,
         "aguardando_nova_pesquisa": False
         }
@@ -615,7 +642,7 @@ class BotImobiliária(dspy.Module):
         estados_pesquisa[mensagem.chat.id] = estado
     
         # ADICIONADO: a primeira resposta apresenta somente três imóveis.
-        self.apresentar_lote(mensagem.chat.id, estado, estado["precisa_de_localizacao"])
+        self.apresentar_lote(mensagem.chat.id, estado)
         está_rodando = False
         return dspy.Prediction("Busca realizada e primeiro lote apresentado.")
 
@@ -663,7 +690,7 @@ def processar_mensagem(message):
       print(f"Mensagem recebida: {message.text}")
 
       if not está_rodando:
-        print("Inciando o bot...")
+        print("Iniciando o bot...")
         usando_json.salvar_mensagem_no_histórico(message.chat.id,message.text)
         #Usando a instância com a mensagem que o cliente mandar
         resultado_interação = bot_recepção(mensagem=message)
@@ -720,6 +747,25 @@ FILTROS_DISPONIVEIS_START = [
 # Assim, o /start não precisa chamar nem modificar o fluxo de pesquisa.
 boas_vindas_ia = dspy.Predict(BoasVindasAssistente)
 
+TEXTO_BOAS_VINDAS = (
+    "Olá! Bem-vindo ao Assistente Imobiliário! 🏡\n\n"
+    "Posso ajudar em: \n "
+    " - Pesquisa de apartamentos;\n"
+    "   Ex: 'Quero ver apartamentos no Butantã por até 1 milhão de reais;'.\n\n"
+    " - Características mais procuradas nos apartamentos;\n"
+    "   Ex: 'Quais os filtros mais pesquisados?'.\n\n"
+    " - Como é morar em determinado bairro em São Paulo;\n"
+    "   Ex: 'Como é morar na Vila Mariana?'.\n\n"
+    "Vamos lá!"
+)
+
+_SAUDACAO = r"(oi+e*|ol[aá]+|opa|eae|e a[ií]|hello|hi|bom dia|boa tarde|boa noite|tudo\s+(bem|bom)|td\s+bem|como\s+vai)"
+PADRAO_SAUDACAO = re.compile(rf"^{_SAUDACAO}(\s+{_SAUDACAO})*$")
+
+def eh_apenas_saudacao(texto: str) -> bool:
+    '''True se a mensagem tem só cumprimentos, sem nenhum pedido junto'''
+    limpo = re.sub(r"[^\w\s]", "", texto.lower()).strip()
+    return bool(PADRAO_SAUDACAO.match(limpo))
 
 # NOVO: Handler independente para o comando /start do Telegram.
 # Ele só recebe o usuário e apresenta as funcionalidades; não pesquisa nem filtra imóveis.
@@ -954,7 +1000,7 @@ def tratar_botoes_resultados(call):
     if estado["proximo_indice"] >= len(estado["resultados"]):
       bot.send_message(chat_id, "Você já viu todos os imóveis encontrados. Se quiser, pode iniciar uma nova pesquisa.")
       return
-    bot_recepção.apresentar_lote(chat_id, estado, estado["precisa_de_localizacao"])
+    bot_recepção.apresentar_lote(chat_id, estado)
     return
 
   if call.data == "imob_filtro":
@@ -980,7 +1026,6 @@ def tratar_botoes_resultados(call):
       "proximo_indice": 0,
       "filtros": [],
       "valores_filtros": {},
-      "precisa_de_localizacao": False,
       "aguardando_filtro": False,
       "aguardando_nova_pesquisa": True
     }
@@ -1063,7 +1108,7 @@ def reply_hi(message):
       estado["proximo_indice"] = 0
       estado["filtros"].extend(filtros_novos.tipos_de_filtro)
       estado["valores_filtros"].update(filtros_novos.valor_desejado)
-      bot_recepção.apresentar_lote(message.chat.id, estado, estado["precisa_de_localizacao"])
+      bot_recepção.apresentar_lote(message.chat.id, estado)
     except Exception as erro:
       # ADICIONADO: se a interpretação falhar, mantém os resultados e permite tentar novamente.
       print(f"Erro ao aplicar filtro adicional: {erro}")
@@ -1075,6 +1120,10 @@ def reply_hi(message):
   if estado and estado.get("aguardando_nova_pesquisa"):
     estados_pesquisa.pop(message.chat.id, None)
 
+  if eh_apenas_saudacao(texto):
+     bot.send_message(chat_id, TEXTO_BOAS_VINDAS)
+     return
+  
   # NOVO: consultas naturais sobre imóveis escolhidos não entram no pipeline de busca.
   pedido_escolhas = identificar_pedido_de_escolhas(texto or "")
   if pedido_escolhas == "todas":
