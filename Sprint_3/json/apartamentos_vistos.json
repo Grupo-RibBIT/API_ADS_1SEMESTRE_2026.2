@@ -1,0 +1,31 @@
+{
+  "6218168942": [
+    {
+      "endereco": "Avenida Marechal Fiuza de Castro 373, Jardim Pinheiros - São Paulo/SP",
+      "valor": 380000.0,
+      "area": 70,
+      "quartos": 3,
+      "banheiros": 2,
+      "estacionamento": 1,
+      "visto_em": "20/11/2026 23:22"
+    },
+    {
+      "endereco": "\"Avenida Marechal Fiuza de Castro 435, Jardim Pinheiros - São Paulo/SP\"",
+      "valor": 410000.0,
+      "area": 69,
+      "quartos": 3,
+      "banheiros": 2,
+      "estacionamento": 1,
+      "visto_em": "20/11/2026 23:22"
+    },
+    {
+      "endereco": "Avenida Diógenes Ribeiro de Lima 2000, Alto de Pinheiros - São Paulo/SP",
+      "valor": 530000.0,
+      "area": 66,
+      "quartos": 3,
+      "banheiros": 1,
+      "estacionamento": 1,
+      "visto_em": "20/11/2026 23:22"
+    }
+  ]
+}
