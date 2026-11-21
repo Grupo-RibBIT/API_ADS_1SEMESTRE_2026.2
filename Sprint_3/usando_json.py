@@ -157,3 +157,51 @@ def sortear_corretor():
     if not validos:
         raise ValueError("Nenhum corretor válido encontrado em json/corretores.json")
     return dict(random.choice(validos))
+
+# NOVO: histórico dos últimos apartamentos vistos por chat, salvo em JSON local.
+ARQUIVO_VISTOS = "apartamentos_vistos.json"
+MAX_VISTOS = 10
+trava_vistos = threading.Lock()  # os timers rodam em threads diferentes
+
+def _ler_vistos():
+  if not os.path.exists(ARQUIVO_VISTOS):
+    return {}
+  try:
+    with open(ARQUIVO_VISTOS, "r", encoding="utf-8") as f:
+      return json.load(f)
+  except (json.JSONDecodeError, OSError):
+    return {}
+
+def registrar_apartamento_visto(chat_id, apt: dict):
+  '''Guarda o apartamento apresentado; se já existia, ele sobe para o topo.'''
+  with trava_vistos:
+    dados = _ler_vistos()
+    chave = str(chat_id)
+    lista = [
+      a for a in dados.get(chave, [])
+      if not (a["endereco"] == apt["endereco"] and a["valor"] == apt["valor"])
+    ]
+    apt["visto_em"] = datetime.now().strftime("%d/%m/%Y %H:%M")
+    lista.append(apt)
+    dados[chave] = lista[-MAX_VISTOS:]
+    with open(ARQUIVO_VISTOS, "w", encoding="utf-8") as f:
+      json.dump(dados, f, ensure_ascii=False, indent=2)
+
+def exibir_apartamentos_vistos(chat_id, limite=5):
+  '''Monta o texto com os últimos apartamentos, do mais recente ao mais antigo.'''
+  with trava_vistos:
+    lista = _ler_vistos().get(str(chat_id), [])
+  vistos = list(reversed(lista))[:limite]
+  if not vistos:
+    return "Você ainda não viu nenhum apartamento."
+
+  texto = "🏢 Últimos apartamentos vistos:\n\n"
+  for i, a in enumerate(vistos, 1):
+    valor = f"{a['valor']:,.0f}".replace(",", ".")
+    texto += (
+      f"{i}. {a['endereco']}\n"
+      f"   R$ {valor} | {a['area']} m² | {a['quartos']} quarto(s) | "
+      f"{a['banheiros']} banheiro(s) | {a['estacionamento']} vaga(s)\n"
+      f"   Visto em {a['visto_em']}\n\n"
+    )
+  return texto
