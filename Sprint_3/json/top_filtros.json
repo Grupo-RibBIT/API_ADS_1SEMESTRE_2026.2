@@ -2,7 +2,7 @@
   "filtros": [
     {
       "filtro": "preço_num",
-      "pesquisas": 10
+      "pesquisas": 14
     },
     {
       "filtro": "Área",
@@ -10,11 +10,11 @@
     },
     {
       "filtro": "Endereço",
-      "pesquisas": 12
+      "pesquisas": 16
     },
     {
       "filtro": "Quartos",
-      "pesquisas": 8
+      "pesquisas": 10
     },
     {
       "filtro": "Banheiros",
@@ -25,5 +25,5 @@
       "pesquisas": 4
     }
   ],
-  "ultima_atualizacao": "2026-11-17 22:34:08"
+  "ultima_atualizacao": "2026-11-20 23:22:09"
 }

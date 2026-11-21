@@ -4,9 +4,9 @@ from datetime import datetime
 import threading
 import random  # NOVO TESTE: sorteio entre corretores cadastrados
 
-CAMINHO_JSON_HISTÓRICO = "json/histórico_cliente.json"
-CAMINHO_JSON_APARTAMENTOS_ESCOLHIDOS = "json/apartamentos_escolhidos.json"
-CAMINHO_JSON_TOP_FILTROS = "json/top_filtros.json"
+CAMINHO_JSON_HISTÓRICO = "Sprint_3/json/histórico_cliente.json"
+CAMINHO_JSON_APARTAMENTOS_ESCOLHIDOS = "Sprint_3/json/apartamentos_escolhidos.json"
+CAMINHO_JSON_TOP_FILTROS = "Sprint_3/json/top_filtros.json"
 
 lock_top_filtros = threading.Lock()
 
@@ -99,7 +99,6 @@ def ler_top_filtros():
         return ranking
 
 # NOVO: arquivo independente para guardar todas as escolhas de imóveis por cliente.
-CAMINHO_JSON_APARTAMENTOS_ESCOLHIDOS = "json/apartamentos_escolhidos.json"
 lock_apartamentos_escolhidos = threading.Lock()
 
 
@@ -141,7 +140,7 @@ def salvar_apartamento_escolhido(id_cliente, registro_escolha):
 
 
 # NOVO TESTE: corretores fornecidos pela equipe, sem criação de telefones.
-CAMINHO_JSON_CORRETORES = "json/corretores.json"
+CAMINHO_JSON_CORRETORES = "Sprint_3/json/corretores.json"
 
 
 def sortear_corretor():
@@ -159,7 +158,7 @@ def sortear_corretor():
     return dict(random.choice(validos))
 
 # NOVO: histórico dos últimos apartamentos vistos por chat, salvo em JSON local.
-ARQUIVO_VISTOS = "apartamentos_vistos.json"
+ARQUIVO_VISTOS = "Sprint_3/json/apartamentos_vistos.json"
 MAX_VISTOS = 10
 trava_vistos = threading.Lock()  # os timers rodam em threads diferentes
 

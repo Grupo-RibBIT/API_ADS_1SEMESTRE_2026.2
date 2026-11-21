@@ -21,7 +21,7 @@ from geopy.geocoders import Nominatim
 
 #Configuração do Bot/Telegram e do LLM
 
-API_TOKEN = 'YOUR TOKEN'
+API_TOKEN = 'YOUR_TOKEN'
 bot = telebot.TeleBot(API_TOKEN)
 
 
@@ -36,7 +36,7 @@ geolocator = Nominatim(user_agent="Bottelegram")
 
 list_fotos_apt = ["kamen-nikolov-fin","maxim-dorokhov","valmik-shah"]
 
-path_csv = r"PATH TO CSV"
+path_csv = "Sprint_1/apartamentos_sp_estruturado.csv"
 
 TiposFiltro = Literal["preço_num","Área","Endereço","Quartos","Banheiros","Vagas_de_estacionamento"]
 
@@ -441,23 +441,6 @@ def filtrar_csv(tipo_de_filtragem,df_bruto,valores_desejados:dict[TiposFiltro,li
     print("Os valores desejados são: ",valores_desejados)
     valores_desejado_atual= valores_desejados[tipo]
 
-    # NOVO TESTE: remove None real sem alterar a lista original produzida pela IA.
-    valores_desejado_atual = [valor for valor in valores_desejado_atual if valor is not None]
-    # NOVO TESTE: se a IA não forneceu limite, não aplica este filtro.
-    if not valores_desejado_atual:
-       continue
-
-    #NOVO: correção dos filtros para não ter valores nulos ou infinitos, ou apenas o valor 0
-    
-    if 'None' in valores_desejado_atual:
-       valores_desejado_atual.remove('None')
-                
-    if "float('inf')" in valores_desejado_atual:
-       valores_desejado_atual.remove("float('inf')")
-       
-    if valores_desejado_atual == [0] or valores_desejado_atual == ['0']:
-       continue
-    
     if tipo == "Área":
        
        if len(valores_desejado_atual) >= 2:
@@ -467,7 +450,7 @@ def filtrar_csv(tipo_de_filtragem,df_bruto,valores_desejados:dict[TiposFiltro,li
        # CORRIGIDO TESTE: aplica o intervalo de Área em ambos os casos.
        df = df[(df[tipo] >= v_min) & (df[tipo] <= v_max)]
        continue  # CORRIGIDO TESTE: impede que Área caia no tratamento genérico.
-    if tipo == "Endereço":
+    elif tipo == "Endereço":
       df = df[
           df[tipo]
           .astype(str)
@@ -804,6 +787,19 @@ class BotImobiliária(dspy.Module):
         fim = time.time()
         print(f"Filtros obtidos em {fim - inicio:.2f} segundos")
         print(filtros_de_pesquisa)
+
+        #NOVO: correção dos filtros para não ter valores nulos ou infinitos, ou apenas o valor 0
+        for tipo in filtros_de_pesquisa.tipos_de_filtro:
+          valores_desejado_atual = filtros_de_pesquisa.valor_desejado[tipo]
+          if 'None' in valores_desejado_atual:
+            valores_desejado_atual.remove('None')
+                      
+          if "float('inf')" in valores_desejado_atual:
+            valores_desejado_atual.remove("float('inf')")
+            
+          if valores_desejado_atual == [0] or valores_desejado_atual == ['0'] or valores_desejado_atual == []:
+            filtros_de_pesquisa.tipos_de_filtro.remove(tipo)
+            filtros_de_pesquisa.valor_desejado.pop(tipo)
 
         usando_json.registrar_filtros_no_ranking(filtros_de_pesquisa.tipos_de_filtro)
 
