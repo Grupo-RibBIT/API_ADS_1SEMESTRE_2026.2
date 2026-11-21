@@ -613,6 +613,24 @@ class BotImobiliária(dspy.Module):
         chat_id_telegram=chat_id_telegram
       )
 
+
+      #NOVO: registra o apartamento no histórico de vistos
+    
+      try:
+
+        usando_json.registrar_apartamento_visto(chat_id_telegram, {
+          "endereco": caracteristicas.endereço_apartamento,
+          "valor": float(caracteristicas.valor),
+          "area": caracteristicas.área,
+          "quartos": caracteristicas.quartos,
+          "banheiros": caracteristicas.banheiros,
+          "estacionamento": caracteristicas.estacionamento,
+        })
+      except Exception as erro_historico:
+        # falha ao salvar o histórico não pode interromper a apresentação
+        print(f"Erro ao registrar apartamento visto: {erro_historico}")
+
+
       #ADICIONADO: Guarda os dados do imóvel usando seu índice como identificador.
       if "imoveis_selecionaveis" not in estado:
          estado["imoveis_selecionaveis"] = {}
@@ -635,7 +653,7 @@ class BotImobiliária(dspy.Module):
       bot.send_message(
          chat_id = chat_id_telegram,
          text="Selecionar imóvel:",
-         reply_markup=teclado_imovel
+         reply_markup=teclado_imovel 
       )
 
       # ALTERADO: a localização Geopy faz parte da apresentação de CADA imóvel.
@@ -1030,6 +1048,9 @@ def mostrar_historico(message):
 
     bot.reply_to(message, texto)
 
+    texto = usando_json.exibir_apartamentos_vistos(message.chat.id)
+
+    bot.reply_to(message, texto)
 
 # NOVO: apresenta as escolhas persistidas para o próprio usuário do Telegram.
 def enviar_escolhas_salvas(chat_id, mostrar_todas=True):
