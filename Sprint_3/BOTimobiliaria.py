@@ -21,7 +21,7 @@ from geopy.geocoders import Nominatim
 
 #Configuração do Bot/Telegram e do LLM
 
-API_TOKEN = 'YOUR_TOKEN'
+API_TOKEN = 'YOUR TOKEN'
 bot = telebot.TeleBot(API_TOKEN)
 
 
@@ -797,7 +797,7 @@ class BotImobiliária(dspy.Module):
           if "float('inf')" in valores_desejado_atual:
             valores_desejado_atual.remove("float('inf')")
             
-          if valores_desejado_atual == [0] or valores_desejado_atual == ['0'] or valores_desejado_atual == []:
+          if valores_desejado_atual == [0] or valores_desejado_atual == [0, 0] or valores_desejado_atual == ['0'] or valores_desejado_atual == []:
             filtros_de_pesquisa.tipos_de_filtro.remove(tipo)
             filtros_de_pesquisa.valor_desejado.pop(tipo)
 
