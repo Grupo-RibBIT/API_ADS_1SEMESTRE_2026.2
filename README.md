@@ -111,7 +111,6 @@ A solução consiste em um **chatbot para o Telegram integrado com uma Inteligê
  <a href="https://openai.com/pt-BR/index/whisper/"><img src="https://img.shields.io/badge/Whisper-412991?style=for-the-badge&logo=openai&logoColor=white"/></a>
  <a href="https://www.openstreetmap.org/#map=5/-15.13/-53.19"><img src="https://img.shields.io/badge/OpenStreetMap-7EBC6F?style=for-the-badge&logo=openstreetmap&logoColor=white"/></a>
  <a href="https://geopy.readthedocs.io/en/stable/"><img src="https://img.shields.io/badge/GeoPy-4285F4?style=for-the-badge&logo=python&logoColor=white"/></a>
- <a href="https://pypi.org/project/RapidFuzz/"><img src="https://img.shields.io/badge/RapidFuzz-6A5ACD?style=for-the-badge&logo=python&logoColor=white"/></a>
  
 
 </div>
